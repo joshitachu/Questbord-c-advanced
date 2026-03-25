@@ -1,6 +1,8 @@
 using QuestBoard.Api.Data;
 using QuestBoard.Api.Models.Domain;
 using QuestBoard.Api.Models.DTOs;
+using QuestBoard.Api.Patterns.Concurrency;
+using QuestBoard.Api.Patterns.Creational;
 using QuestBoard.Api.Patterns.Decorator;
 using QuestBoard.Api.Patterns.Observer;
 using QuestBoard.Api.Patterns.Strategy;
@@ -13,17 +15,23 @@ public class QuestService : IQuestService
     private readonly IEnumerable<IPricingStrategy> _pricingStrategies;
     private readonly IEnumerable<IMatchmakingStrategy> _matchmakingStrategies;
     private readonly IQuestEventPublisher _eventPublisher;
+    private readonly QuestAcceptanceLock _acceptanceLock;
+    private readonly IEventQueue<QuestCompletedEvent> _eventQueue;
 
     public QuestService(
         InMemoryDataStore store,
         IEnumerable<IPricingStrategy> pricingStrategies,
         IEnumerable<IMatchmakingStrategy> matchmakingStrategies,
-        IQuestEventPublisher eventPublisher)
+        IQuestEventPublisher eventPublisher,
+        QuestAcceptanceLock acceptanceLock,
+        IEventQueue<QuestCompletedEvent> eventQueue)
     {
         _store = store;
         _pricingStrategies = pricingStrategies;
         _matchmakingStrategies = matchmakingStrategies;
         _eventPublisher = eventPublisher;
+        _acceptanceLock = acceptanceLock;
+        _eventQueue = eventQueue;
     }
 
     public QuestResponseDto CreateQuest(CreateQuestDto dto)
@@ -35,23 +43,31 @@ public class QuestService : IQuestService
 
         var calculatedGold = strategy.CalculatePrice(dto.BaseGold, (int)dto.Difficulty, dto.Deadline);
 
-        var quest = new Quest
-        {
-            Title = dto.Title,
-            Description = dto.Description,
-            ClientId = dto.ClientId,
-            Difficulty = dto.Difficulty,
-            Type = dto.Type,
-            PricingType = dto.PricingType,
-            BaseGold = calculatedGold,
-            BaseXp = dto.BaseXp > 0 ? dto.BaseXp : CalculateBaseXp(dto.Difficulty),
-            RequiredSkills = dto.RequiredSkills,
-            IsUrgent = dto.IsUrgent,
-            IsFeatured = dto.IsFeatured,
-            IsTeamQuest = dto.IsTeamQuest,
-            MaxTeamSize = dto.IsTeamQuest ? Math.Max(dto.MaxTeamSize, 2) : 1,
-            Deadline = dto.Deadline
-        };
+        // [PATTERN: Builder] — Gebruik QuestBuilder voor leesbare quest constructie
+        var builder = QuestBuilder.Create()
+            .WithTitle(dto.Title)
+            .WithDescription(dto.Description)
+            .ForClient(dto.ClientId)
+            .WithDifficulty(dto.Difficulty)
+            .WithType(dto.Type)
+            .WithPricing(dto.PricingType, calculatedGold)
+            .WithSkills(dto.RequiredSkills.ToArray());
+
+        if (dto.BaseXp > 0)
+            builder.WithBaseXp(dto.BaseXp);
+
+        if (dto.IsUrgent)
+            builder.AsUrgent(dto.Deadline);
+        else if (dto.Deadline.HasValue)
+            builder.WithDeadline(dto.Deadline.Value);
+
+        if (dto.IsFeatured)
+            builder.AsFeatured();
+
+        if (dto.IsTeamQuest)
+            builder.AsTeamQuest(dto.MaxTeamSize);
+
+        var quest = builder.Build();
 
         _store.Quests[quest.Id] = quest;
         return MapToResponse(quest);
@@ -72,23 +88,27 @@ public class QuestService : IQuestService
 
     public QuestResponseDto? AcceptQuest(Guid questId, Guid freelancerId)
     {
-        if (!_store.Quests.TryGetValue(questId, out var quest)) return null;
-        if (!_store.Freelancers.ContainsKey(freelancerId)) return null;
-        if (quest.Status != QuestStatus.Open) return null;
-
-        if (quest.IsTeamQuest && quest.TeamMemberIds.Count < quest.MaxTeamSize)
+        // [PATTERN: Monitor] — Per-quest lock voorkomt race condition op quest.Status
+        return _acceptanceLock.ExecuteWithLock(questId, () =>
         {
-            quest.TeamMemberIds.Add(freelancerId);
-            if (quest.AssignedFreelancerId == null)
+            if (!_store.Quests.TryGetValue(questId, out var quest)) return null;
+            if (!_store.Freelancers.ContainsKey(freelancerId)) return null;
+            if (quest.Status != QuestStatus.Open) return null;
+
+            if (quest.IsTeamQuest && quest.TeamMemberIds.Count < quest.MaxTeamSize)
+            {
+                quest.TeamMemberIds.Add(freelancerId);
+                if (quest.AssignedFreelancerId == null)
+                    quest.AssignedFreelancerId = freelancerId;
+            }
+            else
+            {
                 quest.AssignedFreelancerId = freelancerId;
-        }
-        else
-        {
-            quest.AssignedFreelancerId = freelancerId;
-        }
+            }
 
-        quest.Status = QuestStatus.InProgress;
-        return MapToResponse(quest);
+            quest.Status = QuestStatus.InProgress;
+            return MapToResponse(quest);
+        });
     }
 
     public QuestResponseDto? CompleteQuest(Guid questId)
@@ -105,9 +125,12 @@ public class QuestService : IQuestService
         var finalGold = behavior.CalculateGold(quest.BaseGold);
         var finalXp = behavior.CalculateXp(quest.BaseXp);
 
-        // [PATTERN: Observer] — Notify alle subscribers van quest completion
+        // [PATTERN: Producer-Consumer] — Enqueue event voor async verwerking door BackgroundService
         var evt = new QuestCompletedEvent(quest, freelancer, finalGold, finalXp);
-        _eventPublisher.Notify(evt);
+        _eventQueue.EnqueueAsync(evt).AsTask().Wait();
+
+        // [PATTERN: Monitor] — Cleanup lock na quest completion
+        _acceptanceLock.TryRemoveLock(questId);
 
         return MapToResponse(quest);
     }
@@ -144,15 +167,9 @@ public class QuestService : IQuestService
         return behavior;
     }
 
-    private int CalculateBaseXp(QuestDifficulty difficulty) => difficulty switch
-    {
-        QuestDifficulty.Easy => 100,
-        QuestDifficulty.Medium => 250,
-        QuestDifficulty.Hard => 500,
-        QuestDifficulty.Epic => 1000,
-        QuestDifficulty.Legendary => 2000,
-        _ => 250
-    };
+    // [PATTERN: Singleton] — Delegeer naar GameConfigurationManager
+    private int CalculateBaseXp(QuestDifficulty difficulty) =>
+        GameConfigurationManager.Instance.GetBaseXp(difficulty);
 
     private QuestResponseDto MapToResponse(Quest quest)
     {

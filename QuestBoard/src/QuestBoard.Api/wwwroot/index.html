@@ -12,9 +12,14 @@
         header h1 { color: #fff; font-size: 1.4rem; }
         header h1 span { color: #999; font-weight: 300; font-size: 0.85rem; margin-left: 0.5rem; }
 
-        .nav { display: flex; gap: 0.4rem; }
+        .nav { display: flex; gap: 0.4rem; align-items: center; }
         .nav button { background: #222; color: #ccc; border: 1px solid #444; padding: 0.45rem 0.9rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .nav button:hover, .nav button.active { background: #444; color: #fff; border-color: #666; }
+
+        .connection-status { padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; margin-left: 0.5rem; }
+        .connection-status.connected { background: #1a3a1a; color: #4d4; border: 1px solid #3a3; }
+        .connection-status.disconnected { background: #3a1a1a; color: #d44; border: 1px solid #a33; }
+        .connection-status.connecting { background: #3a3a1a; color: #dd4; border: 1px solid #aa3; }
 
         main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
         .section { display: none; }
@@ -92,8 +97,9 @@
         .notification-form { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.8rem; }
         .notification-form input { width: 160px; }
 
-        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #333; color: #fff; padding: 0.6rem 1rem; border-radius: 4px; font-size: 0.82rem; z-index: 200; display: none; border: 1px solid #555; }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #333; color: #fff; padding: 0.6rem 1rem; border-radius: 4px; font-size: 0.82rem; z-index: 200; display: none; border: 1px solid #555; max-width: 400px; }
         .toast.error { border-color: #933; }
+        .toast.signalr { border-color: #4a4; background: #1a2a1a; }
     </style>
 </head>
 <body>
@@ -106,6 +112,7 @@
             <button onclick="showSection('achievements')">Achievements</button>
             <button onclick="showSection('notifications')">Notifications</button>
             <button onclick="showSection('flyweight')">Flyweight Stats</button>
+            <span id="connection-status" class="connection-status disconnected">Offline</span>
         </div>
     </header>
 
@@ -116,6 +123,10 @@
                 <strong>[Strategy]</strong> Pricing via IPricingStrategy (Fixed/Auction/Dynamic).
                 <strong>[Decorator]</strong> Quest modifiers (Urgent/Featured/Team) gestapeld.
                 <strong>[Observer]</strong> Bij voltooien: XpCalculator + AchievementChecker + LeaderboardUpdater.
+                <strong>[Builder]</strong> Quest objecten gebouwd via fluent QuestBuilder.
+                <strong>[Producer-Consumer]</strong> Events verwerkt op background thread via EventQueue.
+                <strong>[Monitor]</strong> AcceptQuest beschermd met per-quest lock.
+                <strong>[SignalR]</strong> Real-time updates via WebSocket verbinding.
             </div>
             <div class="freelancer-select">
                 <label>Actieve freelancer:</label>
@@ -136,6 +147,7 @@
             <h2>Leaderboard</h2>
             <div class="pattern-info">
                 <strong>[Observer]</strong> LeaderboardUpdaterSubscriber update scores automatisch na quest completion.
+                <strong>[SignalR]</strong> Leaderboard wordt real-time bijgewerkt via WebSocket.
             </div>
             <table>
                 <thead><tr><th>#</th><th>Naam</th><th>Level</th><th>Score</th><th>Quests</th><th>Badges</th></tr></thead>
@@ -209,6 +221,9 @@
     </div>
     <div id="toast" class="toast"></div>
 
+    <!-- SignalR JS Client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
     <script>
         const API = '';
         let selectedFreelancer = null;
@@ -219,12 +234,12 @@
             return res.json();
         }
 
-        function toast(msg, isError) {
+        function toast(msg, isError, isSignalR) {
             const t = document.getElementById('toast');
             t.textContent = msg;
-            t.className = 'toast' + (isError ? ' error' : '');
+            t.className = 'toast' + (isError ? ' error' : '') + (isSignalR ? ' signalr' : '');
             t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
+            setTimeout(() => t.style.display = 'none', 4000);
         }
 
         function showSection(name) {
@@ -297,15 +312,16 @@
         async function completeQuest(id) {
             try {
                 const result = await api('/api/quests/' + id + '/complete', { method: 'POST' });
-                toast('Quest voltooid');
+                toast('Quest voltooid — events worden verwerkt via Producer-Consumer queue');
                 loadQuests();
                 loadFreelancerSelects();
                 openModal('Quest Voltooid', ''
-                    + '<p>Observer subscribers genotificeerd:</p>'
+                    + '<p>Observer subscribers genotificeerd via Producer-Consumer queue:</p>'
                     + '<ul style="margin:0.5rem 0;padding-left:1.2rem;color:#aaa">'
                     + '<li>XpCalculatorSubscriber - XP en Gold toegevoegd</li>'
                     + '<li>AchievementCheckerSubscriber - DSL regels ge-evalueerd</li>'
                     + '<li>LeaderboardUpdaterSubscriber - Score bijgewerkt</li>'
+                    + '<li>SignalRBroadcasterSubscriber - Real-time update verstuurd</li>'
                     + '</ul>'
                     + '<div class="result-box">' + JSON.stringify(result, null, 2) + '</div>'
                 );
@@ -398,8 +414,67 @@
             document.getElementById('badges-pool').innerHTML = data.badges.items.map(b => '<li>' + b.name + ' <span class="cat">' + b.tier + ' - ' + b.description + '</span></li>').join('');
         }
 
+        // === SignalR Connection ===
+        function updateConnectionStatus(status) {
+            const el = document.getElementById('connection-status');
+            el.className = 'connection-status ' + status;
+            el.textContent = status === 'connected' ? 'Live' : status === 'connecting' ? 'Verbinden...' : 'Offline';
+        }
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/hub/questboard')
+            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        connection.on('QuestCompleted', function(data) {
+            toast('Quest voltooid: "' + data.questTitle + '" door ' + data.freelancerName + ' (+' + data.goldEarned + ' Gold, +' + data.xpEarned + ' XP)', false, true);
+            loadQuests();
+            loadFreelancerSelects();
+        });
+
+        connection.on('LeaderboardUpdated', function(data) {
+            loadLeaderboard();
+        });
+
+        connection.on('AchievementUnlocked', function(data) {
+            toast('Achievement ontgrendeld: ' + data.achievementName + ' door ' + data.freelancerName, false, true);
+        });
+
+        connection.on('QuestAccepted', function(data) {
+            toast('Quest geaccepteerd via real-time update', false, true);
+            loadQuests();
+        });
+
+        connection.onreconnecting(function() {
+            updateConnectionStatus('connecting');
+        });
+
+        connection.onreconnected(function() {
+            updateConnectionStatus('connected');
+            toast('SignalR verbinding hersteld', false, true);
+        });
+
+        connection.onclose(function() {
+            updateConnectionStatus('disconnected');
+        });
+
+        async function startSignalR() {
+            try {
+                updateConnectionStatus('connecting');
+                await connection.start();
+                updateConnectionStatus('connected');
+                console.log('SignalR verbonden met /hub/questboard');
+            } catch (err) {
+                updateConnectionStatus('disconnected');
+                console.error('SignalR verbinding mislukt:', err);
+                setTimeout(startSignalR, 5000);
+            }
+        }
+
         loadFreelancerSelects();
         loadQuests();
+        startSignalR();
     </script>
 </body>
 </html>

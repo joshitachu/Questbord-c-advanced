@@ -1,6 +1,9 @@
 using QuestBoard.Api.Data;
+using QuestBoard.Api.Hubs;
 using QuestBoard.Api.Models.Domain;
 using QuestBoard.Api.Patterns.Bridge;
+using QuestBoard.Api.Patterns.Concurrency;
+using QuestBoard.Api.Patterns.Creational;
 using QuestBoard.Api.Patterns.Flyweight;
 using QuestBoard.Api.Patterns.Observer;
 using QuestBoard.Api.Patterns.Strategy;
@@ -18,6 +21,9 @@ builder.Services.AddSingleton<InMemoryDataStore>();
 // === Flyweight Factories (singleton pools) ===
 builder.Services.AddSingleton(SkillFactory.Instance);
 builder.Services.AddSingleton(BadgeFactory.Instance);
+
+// === Creational: Singleton ===
+builder.Services.AddSingleton(GameConfigurationManager.Instance);
 
 // === Strategy Pattern: Pricing ===
 builder.Services.AddSingleton<IPricingStrategy, FixedPricingStrategy>();
@@ -38,6 +44,17 @@ builder.Services.AddSingleton<IQuestEventPublisher, QuestEventPublisher>();
 builder.Services.AddSingleton<XpCalculatorSubscriber>();
 builder.Services.AddSingleton<AchievementCheckerSubscriber>();
 builder.Services.AddSingleton<LeaderboardUpdaterSubscriber>();
+builder.Services.AddSingleton<SignalRBroadcasterSubscriber>();
+
+// === Concurrency: Monitor ===
+builder.Services.AddSingleton<QuestAcceptanceLock>();
+
+// === Concurrency: Producer-Consumer ===
+builder.Services.AddSingleton<IEventQueue<QuestCompletedEvent>>(new EventQueue<QuestCompletedEvent>(100));
+builder.Services.AddHostedService<EventProcessorService>();
+
+// === SignalR ===
+builder.Services.AddSignalR();
 
 // === Services ===
 builder.Services.AddScoped<IQuestService, QuestService>();
@@ -52,6 +69,7 @@ var publisher = app.Services.GetRequiredService<IQuestEventPublisher>();
 publisher.Subscribe(app.Services.GetRequiredService<XpCalculatorSubscriber>());
 publisher.Subscribe(app.Services.GetRequiredService<AchievementCheckerSubscriber>());
 publisher.Subscribe(app.Services.GetRequiredService<LeaderboardUpdaterSubscriber>());
+publisher.Subscribe(app.Services.GetRequiredService<SignalRBroadcasterSubscriber>());
 
 // === Seed Data ===
 SeedData(app.Services);
@@ -65,6 +83,9 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/openapi/v1.json", "QuestBoard API");
 });
 app.MapControllers();
+
+// === SignalR Hub ===
+app.MapHub<QuestBoardHub>("/hub/questboard");
 
 // === Debug Endpoint: Flyweight Stats ===
 app.MapGet("/api/debug/flyweight-stats", (SkillFactory skillFactory, BadgeFactory badgeFactory) =>
@@ -178,32 +199,63 @@ static void SeedData(IServiceProvider services)
     foreach (var a in achievements)
         store.Achievements[a.Id] = a;
 
-    // --- 5 Quests ---
+    // --- 5 Quests (gebouwd met QuestBuilder) ---
     var quests = new Quest[]
     {
-        new() { Title = "Build REST API", Description = "Ontwikkel een complete REST API met ASP.NET Core",
-                ClientId = client1.Id, Difficulty = QuestDifficulty.Medium, Type = QuestType.Development,
-                PricingType = PricingType.Fixed, BaseGold = 500, BaseXp = 250,
-                RequiredSkills = new List<string> { "C#", "ASP.NET Core", "SQL" } },
-        new() { Title = "Frontend Dashboard", Description = "Bouw een React dashboard met real-time data",
-                ClientId = client2.Id, Difficulty = QuestDifficulty.Hard, Type = QuestType.Development,
-                PricingType = PricingType.Dynamic, BaseGold = 800, BaseXp = 500,
-                RequiredSkills = new List<string> { "React", "TypeScript", "JavaScript" },
-                IsUrgent = true, Deadline = DateTime.UtcNow.AddDays(2) },
-        new() { Title = "ML Model Training", Description = "Train een ML model voor klantvoorspellingen",
-                ClientId = client3.Id, Difficulty = QuestDifficulty.Epic, Type = QuestType.DataScience,
-                PricingType = PricingType.Auction, BaseGold = 1500, BaseXp = 1000,
-                RequiredSkills = new List<string> { "Python", "Machine Learning", "SQL" } },
-        new() { Title = "CI/CD Pipeline Setup", Description = "Configureer complete CI/CD pipeline met Docker en K8s",
-                ClientId = client1.Id, Difficulty = QuestDifficulty.Hard, Type = QuestType.DevOps,
-                PricingType = PricingType.Fixed, BaseGold = 700, BaseXp = 500,
-                RequiredSkills = new List<string> { "Docker", "Kubernetes", "Azure" },
-                IsFeatured = true },
-        new() { Title = "Team Website Redesign", Description = "Herontwerp de bedrijfswebsite als team",
-                ClientId = client2.Id, Difficulty = QuestDifficulty.Medium, Type = QuestType.Design,
-                PricingType = PricingType.Fixed, BaseGold = 600, BaseXp = 300,
-                RequiredSkills = new List<string> { "UI/UX Design", "React", "TypeScript" },
-                IsTeamQuest = true, MaxTeamSize = 3, IsFeatured = true }
+        QuestBuilder.Create()
+            .WithTitle("Build REST API")
+            .WithDescription("Ontwikkel een complete REST API met ASP.NET Core")
+            .ForClient(client1.Id)
+            .WithDifficulty(QuestDifficulty.Medium)
+            .WithType(QuestType.Development)
+            .WithPricing(PricingType.Fixed, 500)
+            .WithBaseXp(250)
+            .WithSkills("C#", "ASP.NET Core", "SQL")
+            .Build(),
+        QuestBuilder.Create()
+            .WithTitle("Frontend Dashboard")
+            .WithDescription("Bouw een React dashboard met real-time data")
+            .ForClient(client2.Id)
+            .WithDifficulty(QuestDifficulty.Hard)
+            .WithType(QuestType.Development)
+            .WithPricing(PricingType.Dynamic, 800)
+            .WithBaseXp(500)
+            .WithSkills("React", "TypeScript", "JavaScript")
+            .AsUrgent(DateTime.UtcNow.AddDays(2))
+            .Build(),
+        QuestBuilder.Create()
+            .WithTitle("ML Model Training")
+            .WithDescription("Train een ML model voor klantvoorspellingen")
+            .ForClient(client3.Id)
+            .WithDifficulty(QuestDifficulty.Epic)
+            .WithType(QuestType.DataScience)
+            .WithPricing(PricingType.Auction, 1500)
+            .WithBaseXp(1000)
+            .WithSkills("Python", "Machine Learning", "SQL")
+            .Build(),
+        QuestBuilder.Create()
+            .WithTitle("CI/CD Pipeline Setup")
+            .WithDescription("Configureer complete CI/CD pipeline met Docker en K8s")
+            .ForClient(client1.Id)
+            .WithDifficulty(QuestDifficulty.Hard)
+            .WithType(QuestType.DevOps)
+            .WithPricing(PricingType.Fixed, 700)
+            .WithBaseXp(500)
+            .WithSkills("Docker", "Kubernetes", "Azure")
+            .AsFeatured()
+            .Build(),
+        QuestBuilder.Create()
+            .WithTitle("Team Website Redesign")
+            .WithDescription("Herontwerp de bedrijfswebsite als team")
+            .ForClient(client2.Id)
+            .WithDifficulty(QuestDifficulty.Medium)
+            .WithType(QuestType.Design)
+            .WithPricing(PricingType.Fixed, 600)
+            .WithBaseXp(300)
+            .WithSkills("UI/UX Design", "React", "TypeScript")
+            .AsTeamQuest(3)
+            .AsFeatured()
+            .Build()
     };
     foreach (var q in quests)
         store.Quests[q.Id] = q;
