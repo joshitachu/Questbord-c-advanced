@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Interpreter;
 
+// [PATTERN: Interpreter] Context met freelancer stats voor DSL evaluatie
 /// <summary>
 /// Context containing evaluatable freelancer stats for achievement rule interpretation.
 /// Typical keys: "quests.completed", "rating.avg", "level", "gold", "xp", "skills.count", "badges.count"

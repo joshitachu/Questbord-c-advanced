@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Bridge;
 
+// [PATTERN: Bridge] Concrete implementor — webhook kanaal
 public class WebhookSender : INotificationSender
 {
     public string Channel => "Webhook";

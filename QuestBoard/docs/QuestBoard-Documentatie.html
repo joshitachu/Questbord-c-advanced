@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>QuestBoard - Design Patterns Documentatie</title>
+    <style>
+        @page { margin: 2cm; size: A4; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #222; max-width: 800px; margin: 0 auto; padding: 2rem; }
+        h1 { font-size: 22pt; border-bottom: 3px solid #333; padding-bottom: 0.3rem; margin-top: 0; }
+        h2 { font-size: 16pt; color: #333; border-bottom: 2px solid #666; padding-bottom: 0.2rem; margin-top: 2.5rem; page-break-before: always; }
+        h2:first-of-type { page-break-before: avoid; }
+        h3 { font-size: 12pt; color: #444; margin-top: 1.2rem; margin-bottom: 0.3rem; }
+        p { margin: 0.4rem 0; }
+        code { background: #f0f0f0; padding: 0.1rem 0.3rem; border-radius: 2px; font-size: 10pt; font-family: 'Consolas', 'Courier New', monospace; }
+        pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 0.8rem; font-size: 9pt; font-family: 'Consolas', 'Courier New', monospace; overflow-x: auto; line-height: 1.4; page-break-inside: avoid; }
+        table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; font-size: 10pt; }
+        th, td { border: 1px solid #ccc; padding: 0.4rem 0.6rem; text-align: left; }
+        th { background: #f0f0f0; font-weight: 600; }
+        .meta { color: #666; font-size: 10pt; margin-bottom: 1.5rem; }
+        .diagram { background: #fafafa; border: 1px solid #ddd; padding: 0.8rem; font-family: 'Consolas', monospace; font-size: 9pt; white-space: pre; line-height: 1.3; page-break-inside: avoid; margin: 0.5rem 0; }
+        .tag { display: inline-block; background: #e8e8e8; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 9pt; font-weight: 600; margin-right: 0.3rem; }
+        .cover { text-align: center; padding: 4rem 0; page-break-after: always; }
+        .cover h1 { border: none; font-size: 28pt; }
+        .cover .subtitle { font-size: 14pt; color: #555; margin-top: 0.5rem; }
+        .toc { page-break-after: always; }
+        .toc h2 { page-break-before: avoid; }
+        .toc ol { font-size: 11pt; line-height: 2; }
+        ul { margin: 0.3rem 0; padding-left: 1.5rem; }
+        li { margin: 0.2rem 0; }
+        .pro { color: #2a7a2a; }
+        .con { color: #a03030; }
+    </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+    <h1>QuestBoard</h1>
+    <div class="subtitle">Gamified Freelance Platform</div>
+    <p style="font-size:13pt; margin-top:2rem;">Design Patterns Documentatie</p>
+    <p style="margin-top:3rem;">
+        <strong>Vak:</strong> C# Advanced<br>
+        <strong>Type:</strong> ASP.NET Core Web API<br>
+        <strong>Patterns:</strong> 6 (26 punten totaal)<br>
+        <strong>Framework:</strong> .NET 10 / ASP.NET Core
+    </p>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+    <h2>Inhoudsopgave</h2>
+    <ol>
+        <li><strong>Projectoverzicht</strong></li>
+        <li><strong>Strategy Pattern</strong> (Behavioral, 4 pts)</li>
+        <li><strong>Flyweight Pattern</strong> (Structural, 4 pts)</li>
+        <li><strong>Decorator Pattern</strong> (Structural, 4 pts)</li>
+        <li><strong>Bridge Pattern</strong> (Structural, 5 pts)</li>
+        <li><strong>Interpreter Pattern</strong> (Behavioral, 5 pts)</li>
+        <li><strong>Observer Pattern</strong> (Behavioral, 4 pts)</li>
+        <li><strong>Pattern Samenwerking</strong></li>
+    </ol>
+</div>
+
+<!-- 1. PROJECT OVERVIEW -->
+<h2>1. Projectoverzicht</h2>
+
+<p><strong>QuestBoard</strong> is een gamified freelance platform waar taken worden gemodelleerd als RPG-quests. Freelancers verdienen XP, gold en badges door quests te voltooien. Het project demonstreert 6 GoF design patterns in een werkende ASP.NET Core Web API.</p>
+
+<h3>Architectuur</h3>
+<div class="diagram">
+QuestBoard.sln
++-- src/QuestBoard.Api/
+|   +-- Controllers/        5 API controllers
+|   +-- Models/Domain/      Quest, Freelancer, Client, Achievement, Enums
+|   +-- Models/DTOs/        Data Transfer Objects
+|   +-- Services/           4 service interfaces + implementaties
+|   +-- Data/               InMemoryDataStore (ConcurrentDictionary)
+|   +-- Patterns/
+|       +-- Strategy/       IPricingStrategy, IMatchmakingStrategy + implementaties
+|       +-- Flyweight/      SkillFactory, BadgeFactory + flyweight objecten
+|       +-- Decorator/      IQuestBehavior + 3 decorators
+|       +-- Bridge/         Notification x INotificationSender
+|       +-- Interpreter/    IExpression + AchievementRuleParser
+|       +-- Observer/       IQuestEventPublisher + 3 subscribers
++-- tests/QuestBoard.Tests/
+    +-- Patterns/           6 testklassen, 38 unit tests
+</div>
+
+<h3>Kernflow: Quest Voltooien</h3>
+<div class="diagram">
+POST /api/quests/{id}/complete
+  |-- Decorator: berekent finale XP/Gold (Urgent 1.5x, Featured 1.2x, Team Nx)
+  |-- Observer: QuestEventPublisher.Notify()
+  |   |-- XpCalculatorSubscriber: XP + Gold + level-up
+  |   |-- AchievementCheckerSubscriber:
+  |   |   |-- Interpreter: parse DSL regel -> expression tree -> evaluate
+  |   |   |-- Flyweight: BadgeFactory.GetBadge() (gedeeld object)
+  |   |   +-- Bridge: AchievementAlert + EmailSender -> notify
+  |   +-- LeaderboardUpdaterSubscriber: score bijwerken
+  +-- Response met updated quest
+</div>
+
+<!-- 2. STRATEGY -->
+<h2>2. Strategy Pattern</h2>
+
+<table>
+    <tr><th>GoF Categorie</th><td>Behavioral</td></tr>
+    <tr><th>Punten</th><td>4</td></tr>
+    <tr><th>Bestanden</th><td>7 bronbestanden, 6 tests</td></tr>
+</table>
+
+<h3>2.1 Probleem</h3>
+<p>QuestBoard heeft meerdere prijsberekeningen (vast, veiling, dynamisch) en matchmaking-algoritmes (skill-based, rating-based). Zonder pattern zou dit leiden tot lange if/else-ketens in de service laag die moeilijk uitbreidbaar zijn. Bij elke nieuw pricing model of matchmaking strategie moet bestaande code worden aangepast.</p>
+
+<h3>2.2 Oplossing</h3>
+<p>Het Strategy pattern definieert een familie van algoritmes, kapselt elk in een eigen klasse, en maakt ze uitwisselbaar. De client (QuestService) kiest runtime welke strategie wordt gebruikt zonder de algoritme-implementatie te kennen.</p>
+
+<h3>2.3 Class Diagram</h3>
+<div class="diagram">
+        +---------------------+
+        | IPricingStrategy    |&lt;----- QuestService
+        +---------------------+        (gebruikt via DI)
+        | +Name: string       |
+        | +CalculatePrice()   |
+        +---------------------+
+           ^    ^    ^
+           |    |    |
+    +------+  +-------+  +--------+
+    |Fixed |  |Auction |  |Dynamic |
+    +------+  +-------+  +--------+
+    |100%  |  |80%     |  |factor  |
+    +------+  +-------+  |+urgency|
+                          +--------+
+
+        +----------------------+
+        | IMatchmakingStrategy |&lt;----- QuestService
+        +----------------------+
+        | +Name: string        |
+        | +FindMatches()       |
+        +----------------------+
+           ^           ^
+           |           |
+    +----------+  +-----------+
+    |SkillBased|  |RatingBased|
+    +----------+  +-----------+
+</div>
+
+<h3>2.4 Implementatie</h3>
+<pre>
+// Interface - definieert het contract voor alle pricing strategieen
+public interface IPricingStrategy
+{
+    string Name { get; }
+    decimal CalculatePrice(decimal basePrice, int difficulty, DateTime? deadline);
+}
+
+// Concrete strategy - DynamicPricingStrategy past prijs aan op moeilijkheid en deadline
+public class DynamicPricingStrategy : IPricingStrategy
+{
+    public string Name => "Dynamic";
+
+    private static readonly Dictionary&lt;int, decimal&gt; DifficultyMultipliers = new()
+    {
+        [0] = 0.8m,  // Easy
+        [1] = 1.0m,  // Medium
+        [2] = 1.3m,  // Hard
+        [3] = 1.6m,  // Epic
+        [4] = 2.0m   // Legendary
+    };
+
+    public decimal CalculatePrice(decimal basePrice, int difficulty, DateTime? deadline)
+    {
+        var multiplier = DifficultyMultipliers.GetValueOrDefault(difficulty, 1.0m);
+        var price = basePrice * multiplier;
+
+        // Urgency surcharge: +25% als deadline binnen 3 dagen
+        if (deadline.HasValue && (deadline.Value - DateTime.UtcNow).TotalDays &lt;= 3)
+            price *= 1.25m;
+
+        return price;
+    }
+}
+
+// Gebruik in QuestService - strategy wordt runtime geselecteerd
+var strategy = _pricingStrategies
+    .FirstOrDefault(s => s.Name.Equals(dto.PricingType.ToString(),
+        StringComparison.OrdinalIgnoreCase))
+    ?? _pricingStrategies.First();
+
+var calculatedGold = strategy.CalculatePrice(dto.BaseGold, (int)dto.Difficulty, dto.Deadline);
+</pre>
+
+<h3>2.5 Voordelen en Nadelen</h3>
+<ul>
+    <li class="pro"><strong>+</strong> Open/Closed Principle: nieuwe strategie toevoegen zonder bestaande code te wijzigen</li>
+    <li class="pro"><strong>+</strong> Strategieen zijn onafhankelijk testbaar</li>
+    <li class="pro"><strong>+</strong> Runtime wisselen van algoritme mogelijk</li>
+    <li class="con"><strong>-</strong> Meer klassen nodig dan een simpele if/else</li>
+    <li class="con"><strong>-</strong> Client moet weten welke strategieen bestaan</li>
+</ul>
+
+<h3>2.6 Alternatieven</h3>
+<table>
+    <tr><th>Alternatief</th><th>Waarom niet gekozen</th></tr>
+    <tr><td>If/else of switch in service</td><td>Schendt Open/Closed Principle. Elke nieuwe pricing vereist aanpassing van bestaande code.</td></tr>
+    <tr><td>Template Method</td><td>Vereist overerving i.p.v. compositie. Minder flexibel: kan niet runtime wisselen.</td></tr>
+    <tr><td>Command Pattern</td><td>Te zwaar voor simpele berekeningen. Command is beter voor undo/redo scenarios.</td></tr>
+</table>
+
+<h3>2.7 Uitbreidbaarheid</h3>
+<p>Een nieuwe pricing strategie toevoegen (bijv. <code>SubscriptionPricingStrategy</code>) vereist slechts:</p>
+<ol>
+    <li>Nieuwe klasse aanmaken die <code>IPricingStrategy</code> implementeert</li>
+    <li>Registreren in DI container: <code>builder.Services.AddSingleton&lt;IPricingStrategy, SubscriptionPricingStrategy&gt;()</code></li>
+</ol>
+<p>Geen bestaande code hoeft te worden aangepast.</p>
+
+<!-- 3. FLYWEIGHT -->
+<h2>3. Flyweight Pattern</h2>
+
+<table>
+    <tr><th>GoF Categorie</th><td>Structural</td></tr>
+    <tr><th>Punten</th><td>4</td></tr>
+    <tr><th>Bestanden</th><td>4 bronbestanden, 5 tests</td></tr>
+</table>
+
+<h3>3.1 Probleem</h3>
+<p>In QuestBoard hebben veel freelancers dezelfde skills (bijv. "C#", "React") en verdienen dezelfde badges. Zonder Flyweight zou elke freelancer een eigen kopie van elk skill/badge-object in geheugen hebben. Bij 1000 freelancers met gemiddeld 5 skills = 5000 skill-objecten, terwijl er maar 15 unieke skills zijn.</p>
+
+<h3>3.2 Oplossing</h3>
+<p>Het Flyweight pattern deelt objecten die veel voorkomen via een factory pool. De SkillFactory en BadgeFactory garanderen dat er per unieke skill/badge slechts 1 object in geheugen bestaat. Meerdere freelancers verwijzen naar hetzelfde object.</p>
+
+<h3>3.3 Class Diagram</h3>
+<div class="diagram">
+    +------------------+         +------------------+
+    | SkillFactory     |         | SkillFlyweight   |
+    | (Singleton)      |-------->| (Immutable)      |
+    +------------------+         +------------------+
+    | -_pool: Dict     |         | +Name: string    |
+    | +GetSkill()      |         | +Category: string|
+    | +GetSkillCount() |         | +IconUrl: string |
+    | +GetAllSkills()  |         +------------------+
+    +------------------+
+
+    +------------------+         +------------------+
+    | BadgeFactory     |         | BadgeFlyweight   |
+    | (Singleton)      |-------->| (Immutable)      |
+    +------------------+         +------------------+
+    | -_pool: Dict     |         | +Name: string    |
+    | +GetBadge()      |         | +Description     |
+    | +GetBadgeCount() |         | +Tier: string    |
+    | +GetAllBadges()  |         | +IconUrl: string |
+    +------------------+         +------------------+
+
+    Freelancer A --\
+    Freelancer B ---+--> SkillFlyweight("C#")  (zelfde object)
+    Freelancer C --/
+</div>
+
+<h3>3.4 Implementatie</h3>
+<pre>
+// Flyweight object - immutable, gedeeld via factory
+public sealed class SkillFlyweight
+{
+    public string Name { get; }
+    public string Category { get; }
+    public string IconUrl { get; }
+
+    public SkillFlyweight(string name, string category, string iconUrl)
+    {
+        Name = name ?? throw new ArgumentNullException(nameof(name));
+        Category = category ?? throw new ArgumentNullException(nameof(category));
+        IconUrl = iconUrl ?? throw new ArgumentNullException(nameof(iconUrl));
+    }
+}
+
+// Factory met singleton pool - garandeert 1 object per unieke naam
+public sealed class SkillFactory
+{
+    private static readonly Lazy&lt;SkillFactory&gt; _instance = new(() => new SkillFactory());
+    private readonly ConcurrentDictionary&lt;string, SkillFlyweight&gt; _pool = new();
+
+    private SkillFactory() { }
+    public static SkillFactory Instance => _instance.Value;
+
+    public SkillFlyweight GetSkill(string name, string category = "General",
+        string iconUrl = "")
+    {
+        return _pool.GetOrAdd(name, key => new SkillFlyweight(key, category, iconUrl));
+    }
+}
+
+// Bewijs dat objecten gedeeld worden (unit test)
+var skill1 = factory.GetSkill("C#");
+var skill2 = factory.GetSkill("C#");
+Assert.True(ReferenceEquals(skill1, skill2)); // Zelfde object in geheugen
+</pre>
+
+<h3>3.5 Voordelen en Nadelen</h3>
+<ul>
+    <li class="pro"><strong>+</strong> Significant minder geheugengebruik bij veel gedeelde objecten</li>
+    <li class="pro"><strong>+</strong> ConcurrentDictionary maakt het thread-safe voor web requests</li>
+    <li class="pro"><strong>+</strong> Immutability voorkomt onbedoelde wijzigingen aan gedeelde state</li>
+    <li class="con"><strong>-</strong> Complexer dan simpele objecten aanmaken</li>
+    <li class="con"><strong>-</strong> Intrinsic/extrinsic state scheiding moet goed doordacht zijn</li>
+</ul>
+
+<h3>3.6 Alternatieven</h3>
+<table>
+    <tr><th>Alternatief</th><th>Waarom niet gekozen</th></tr>
+    <tr><td>Gewone objecten (geen sharing)</td><td>Werkt, maar verspilt geheugen bij veel duplicaten. Niet schaalbaar.</td></tr>
+    <tr><td>String interning</td><td>Alleen voor strings, niet voor objecten met meerdere properties.</td></tr>
+    <tr><td>Object Pool pattern</td><td>Object Pool is voor hergebruik van dure objecten (DB connections). Flyweight is voor sharing van identieke read-only objecten.</td></tr>
+</table>
+
+<h3>3.7 Uitbreidbaarheid</h3>
+<p>Nieuwe flyweight types toevoegen (bijv. <code>CertificationFlyweight</code> + <code>CertificationFactory</code>) volgt exact hetzelfde patroon. De <code>/api/debug/flyweight-stats</code> endpoint toont realtime hoeveel objecten in de pools zitten.</p>
+
+<!-- 4. DECORATOR -->
+<h2>4. Decorator Pattern</h2>
+
+<table>
+    <tr><th>GoF Categorie</th><td>Structural</td></tr>
+    <tr><th>Punten</th><td>4</td></tr>
+    <tr><th>Bestanden</th><td>6 bronbestanden, 7 tests</td></tr>
+</table>
+
+<h3>4.1 Probleem</h3>
+<p>Quests kunnen modifiers hebben: urgent (hogere beloning), featured (extra XP), team (meerdere personen). Deze modifiers moeten combineerbaar zijn: een quest kan urgent EN featured EN team zijn. Met subclassing zou dit leiden tot een class-explosie: UrgentQuest, FeaturedQuest, UrgentFeaturedQuest, UrgentTeamQuest, etc.</p>
+
+<h3>4.2 Oplossing</h3>
+<p>Het Decorator pattern wikkelt quest behavior in lagen. Elke decorator voegt specifiek gedrag toe en delegeert de rest naar het inner object. Decorators zijn stapelbaar: <code>new UrgentDecorator(new FeaturedDecorator(new BaseQuestBehavior()))</code>.</p>
+
+<h3>4.3 Class Diagram</h3>
+<div class="diagram">
+    +------------------+
+    | IQuestBehavior   |&lt;-----------------+
+    +------------------+                  |
+    | +CalculateGold() |                  |
+    | +CalculateXp()   |                  |
+    | +GetTags()       |                  |
+    | +GetDescription()|                  |
+    | +GetMaxTeamSize()|                  |
+    +------------------+                  |
+         ^         ^                      |
+         |         |                      |
+    +--------+ +----------------+         |
+    |BaseQuest| |QuestDecorator |-------- +
+    |Behavior | |(abstract)     |  _inner
+    +--------+ +----------------+
+    |passthru| | #_inner        |
+    +--------+ +----------------+
+                    ^   ^   ^
+                    |   |   |
+           +--------+ +------+ +------+
+           |Urgent   | |Featured| |Team  |
+           |Decorator| |Decorator| |Decorator|
+           +--------+ +------+ +------+
+           |gold*1.5 | |gold*1.2| |gold*N |
+           |xp*2     | |xp+50   | |xp*0.8 |
+           +--------+ +------+ +------+
+
+    Stacking: Urgent(Featured(Base)) -> gold = base * 1.2 * 1.5
+</div>
+
+<h3>4.4 Implementatie</h3>
+<pre>
+// Interface
+public interface IQuestBehavior
+{
+    decimal CalculateGold(decimal baseGold);
+    int CalculateXp(int baseXp);
+    List&lt;string&gt; GetTags();
+    string GetDescription(string baseDescription);
+}
+
+// Abstract decorator - delegeert alles naar inner
+public abstract class QuestDecorator : IQuestBehavior
+{
+    protected readonly IQuestBehavior _inner;
+    protected QuestDecorator(IQuestBehavior inner) => _inner = inner;
+
+    public virtual decimal CalculateGold(decimal baseGold) => _inner.CalculateGold(baseGold);
+    public virtual int CalculateXp(int baseXp) => _inner.CalculateXp(baseXp);
+    // ... andere methods delegeren naar _inner
+}
+
+// Concrete decorator - voegt urgency premium toe
+public class UrgentQuestDecorator : QuestDecorator
+{
+    public UrgentQuestDecorator(IQuestBehavior inner) : base(inner) { }
+
+    public override decimal CalculateGold(decimal baseGold) =>
+        _inner.CalculateGold(baseGold) * 1.5m;
+
+    public override int CalculateXp(int baseXp) =>
+        _inner.CalculateXp(baseXp) * 2;
+}
+
+// Stacking in QuestService - decorators worden dynamisch gestapeld
+IQuestBehavior behavior = new BaseQuestBehavior();
+if (quest.IsUrgent)   behavior = new UrgentQuestDecorator(behavior);
+if (quest.IsFeatured) behavior = new FeaturedQuestDecorator(behavior);
+if (quest.IsTeamQuest) behavior = new TeamQuestDecorator(behavior, quest.MaxTeamSize);
+</pre>
+
+<h3>4.5 Voordelen en Nadelen</h3>
+<ul>
+    <li class="pro"><strong>+</strong> Modifiers vrij combineerbaar zonder class-explosie</li>
+    <li class="pro"><strong>+</strong> Single Responsibility: elke decorator doet 1 ding</li>
+    <li class="pro"><strong>+</strong> Open/Closed: nieuwe modifier = nieuwe decorator klasse</li>
+    <li class="con"><strong>-</strong> Veel kleine objecten door de wrapping-lagen</li>
+    <li class="con"><strong>-</strong> Volgorde van decorators kan het resultaat beinvloeden</li>
+</ul>
+
+<h3>4.6 Alternatieven</h3>
+<table>
+    <tr><th>Alternatief</th><th>Waarom niet gekozen</th></tr>
+    <tr><td>Subclassing per combinatie</td><td>Class-explosie: 3 modifiers = 7 combinaties (2^3 - 1). Niet schaalbaar.</td></tr>
+    <tr><td>If/else flags in Quest klasse</td><td>Schendt Single Responsibility. Alle modifier-logica in 1 klasse.</td></tr>
+    <tr><td>Strategy Pattern</td><td>Strategy wisselt het hele algoritme. Decorator stapelt aanpassingen bovenop elkaar.</td></tr>
+</table>
+
+<h3>4.7 Uitbreidbaarheid</h3>
+<p>Een nieuwe modifier (bijv. <code>SeasonalQuestDecorator</code> met holiday bonus) vereist alleen een nieuwe klasse die <code>QuestDecorator</code> extend. Bestaande decorators en de QuestService hoeven niet te worden aangepast.</p>
+
+<!-- 5. BRIDGE -->
+<h2>5. Bridge Pattern</h2>
+
+<table>
+    <tr><th>GoF Categorie</th><td>Structural</td></tr>
+    <tr><th>Punten</th><td>5</td></tr>
+    <tr><th>Bestanden</th><td>7 bronbestanden, 5 tests</td></tr>
+</table>
+
+<h3>5.1 Probleem</h3>
+<p>QuestBoard heeft 2 soorten notificaties (QuestAlert, AchievementAlert) en 3 verzendkanalen (Email, Push, Webhook). Zonder Bridge zou elke combinatie een aparte klasse vereisen: QuestAlertEmail, QuestAlertPush, AchievementAlertWebhook, etc. Dat zijn 2 x 3 = 6 klassen, en bij een nieuw kanaal of type groeit dit exponentieel.</p>
+
+<h3>5.2 Oplossing</h3>
+<p>Het Bridge pattern scheidt de abstractie (wat voor notificatie) van de implementatie (hoe te versturen). Beide hierarchieen kunnen onafhankelijk uitgebreid worden. Een <code>QuestAlert</code> kan met elke <code>INotificationSender</code> werken zonder de specifieke sender te kennen.</p>
+
+<h3>5.3 Class Diagram</h3>
+<div class="diagram">
+    Abstractie                          Implementatie
+    +-------------------+               +---------------------+
+    | Notification      |               | INotificationSender |
+    | (abstract)        |-------------->| (interface)         |
+    +-------------------+   _sender     +---------------------+
+    | +Notify()         |               | +Channel: string    |
+    | +SenderChannel    |               | +Send()             |
+    +-------------------+               +---------------------+
+         ^         ^                       ^      ^      ^
+         |         |                       |      |      |
+    +--------+ +----------+          +-----+ +----+ +-------+
+    |Quest   | |Achievement|         |Email| |Push| |Webhook|
+    |Alert   | |Alert      |        |Sender| |Sender| |Sender|
+    +--------+ +----------+          +-----+ +----+ +-------+
+
+    Combinaties: 2 x 3 = 6 mogelijkheden met slechts 5 klassen
+    (i.p.v. 6 klassen zonder Bridge)
+</div>
+
+<h3>5.4 Implementatie</h3>
+<pre>
+// Implementor interface
+public interface INotificationSender
+{
+    string Channel { get; }
+    string Send(string recipient, string subject, string body);
+}
+
+// Concrete implementor
+public class EmailSender : INotificationSender
+{
+    public string Channel => "Email";
+    public string Send(string recipient, string subject, string body) =>
+        $"[EMAIL] To: {recipient} | Subject: {subject} | Body: {body}";
+}
+
+// Abstractie
+public abstract class Notification
+{
+    protected readonly INotificationSender _sender;
+    protected Notification(INotificationSender sender) => _sender = sender;
+    public abstract string Notify(string recipient);
+}
+
+// Refined abstractie
+public class QuestAlert : Notification
+{
+    public string QuestTitle { get; }
+    public string QuestStatus { get; }
+
+    public QuestAlert(INotificationSender sender, string questTitle, string questStatus)
+        : base(sender) { QuestTitle = questTitle; QuestStatus = questStatus; }
+
+    public override string Notify(string recipient) =>
+        _sender.Send(recipient,
+            $"Quest Update: {QuestTitle}",
+            $"Quest '{QuestTitle}' status changed to: {QuestStatus}");
+}
+
+// Gebruik - zelfde alert, verschillende senders
+var emailAlert = new QuestAlert(new EmailSender(), "Build API", "Completed");
+var pushAlert  = new QuestAlert(new PushNotificationSender(), "Build API", "Completed");
+// Beide werken, andere output
+</pre>
+
+<h3>5.5 Voordelen en Nadelen</h3>
+<ul>
+    <li class="pro"><strong>+</strong> Voorkomt class-explosie bij meerdere dimensies</li>
+    <li class="pro"><strong>+</strong> Abstractie en implementatie onafhankelijk uitbreidbaar</li>
+    <li class="pro"><strong>+</strong> Runtime wisselen van sender mogelijk</li>
+    <li class="con"><strong>-</strong> Extra abstractielaag kan overkill zijn bij weinig combinaties</li>
+    <li class="con"><strong>-</strong> Indirectie maakt debugging complexer</li>
+</ul>
+
+<h3>5.6 Alternatieven</h3>
+<table>
+    <tr><th>Alternatief</th><th>Waarom niet gekozen</th></tr>
+    <tr><td>Overerving per combinatie</td><td>Class-explosie: N types x M kanalen klassen. Niet schaalbaar.</td></tr>
+    <tr><td>Strategy Pattern</td><td>Strategy wisselt 1 dimensie (het algoritme). Bridge scheidt 2 onafhankelijke hierarchieen.</td></tr>
+    <tr><td>Abstract Factory</td><td>Abstract Factory creert families van objecten. Bridge koppelt abstractie aan implementatie.</td></tr>
+</table>
+
+<h3>5.7 Uitbreidbaarheid</h3>
+<p>Een nieuw kanaal (bijv. <code>SmsSender</code>) of een nieuw notificatietype (bijv. <code>PaymentAlert</code>) toevoegen vereist slechts 1 nieuwe klasse. Alle bestaande combinaties blijven werken.</p>
+
+<!-- 6. INTERPRETER -->
+<h2>6. Interpreter Pattern</h2>
+
+<table>
+    <tr><th>GoF Categorie</th><td>Behavioral</td></tr>
+    <tr><th>Punten</th><td>5</td></tr>
+    <tr><th>Bestanden</th><td>6 bronbestanden, 9 tests</td></tr>
+</table>
+
+<h3>6.1 Probleem</h3>
+<p>Achievement-regels moeten flexibel definieerbaar zijn zonder code-aanpassingen. Voorbeelden: "minimaal 10 quests voltooid", "rating boven 4.5 en level 5+". Hardcoded if-statements vereisen een nieuwe deployment voor elke nieuwe achievement. We willen regels als data opslaan en runtime evalueren.</p>
+
+<h3>6.2 Oplossing</h3>
+<p>Het Interpreter pattern definieert een grammatica voor achievement-regels als DSL (Domain Specific Language). De <code>AchievementRuleParser</code> parsed strings zoals <code>"quests.completed >= 10 and rating.avg > 4.5"</code> naar een expression tree die ge-evalueerd wordt tegen freelancer stats.</p>
+
+<h3>6.3 Class Diagram</h3>
+<div class="diagram">
+    +------------------+     +---------------------+
+    | IExpression      |     | AchievementContext   |
+    +------------------+     +---------------------+
+    | +Interpret(ctx)  |     | -_properties: Dict   |
+    +------------------+     | +GetValue(key)       |
+       ^     ^     ^         +---------------------+
+       |     |     |
+    +------+ +---+ +----+    +----------------------+
+    |Compar| |And| |Or  |    | AchievementRuleParser|
+    |ison  | |Exp| |Exp |    +----------------------+
+    +------+ +---+ +----+    | +Parse(string): IExp |
+    |prop  | |L,R| |L,R |    +----------------------+
+    |op    | +---+ +----+
+    |value |                  DSL Grammatica:
+    +------+                  rule     = or_group
+                              or_group = and_group (" or " and_group)*
+                              and_group = comparison (" and " comparison)*
+                              comparison = property operator value
+</div>
+
+<h3>6.4 Implementatie</h3>
+<pre>
+// Terminal expression - vergelijkt een property met een waarde
+public class ComparisonExpression : IExpression
+{
+    private readonly string _property;
+    private readonly string _operator;
+    private readonly double _value;
+
+    public bool Interpret(AchievementContext context)
+    {
+        var actual = context.GetValue(_property);
+        return _operator switch
+        {
+            ">"  => actual > _value,
+            ">=" => actual >= _value,
+            "&lt;"  => actual &lt; _value,
+            "&lt;=" => actual &lt;= _value,
+            "==" => Math.Abs(actual - _value) &lt; 0.0001,
+            _ => throw new InvalidOperationException($"Unknown operator: {_operator}")
+        };
+    }
+}
+
+// Non-terminal expression - logische AND
+public class AndExpression : IExpression
+{
+    private readonly IExpression _left, _right;
+    public bool Interpret(AchievementContext context) =>
+        _left.Interpret(context) && _right.Interpret(context);
+}
+
+// Parser - zet string om naar expression tree
+// "quests.completed >= 10 and rating.avg > 4.5"
+//   -> AndExpression(
+//        ComparisonExpression("quests.completed", ">=", 10),
+//        ComparisonExpression("rating.avg", ">", 4.5))
+public static class AchievementRuleParser
+{
+    public static IExpression Parse(string rule)
+    {
+        // 1. Split op " or " (lagere precedentie)
+        var orParts = rule.Split(" or ");
+        var orExpressions = orParts.Select(ParseAndGroup).ToArray();
+        // 2. Bouw OR tree
+        IExpression result = orExpressions[0];
+        for (var i = 1; i &lt; orExpressions.Length; i++)
+            result = new OrExpression(result, orExpressions[i]);
+        return result;
+    }
+}
+</pre>
+
+<h3>6.5 Voordelen en Nadelen</h3>
+<ul>
+    <li class="pro"><strong>+</strong> Achievement regels zijn data, niet code: aanpasbaar zonder recompilatie</li>
+    <li class="pro"><strong>+</strong> Nieuwe operators/properties toevoegen is eenvoudig</li>
+    <li class="pro"><strong>+</strong> Expression tree is composable: complexe regels uit simpele delen</li>
+    <li class="con"><strong>-</strong> Parser schrijven is complex en foutgevoelig</li>
+    <li class="con"><strong>-</strong> Geen ondersteuning voor haakjes (bewuste vereenvoudiging)</li>
+    <li class="con"><strong>-</strong> Performance: elke evaluatie parsed en bouwt een tree</li>
+</ul>
+
+<h3>6.6 Alternatieven</h3>
+<table>
+    <tr><th>Alternatief</th><th>Waarom niet gekozen</th></tr>
+    <tr><td>Hardcoded if/else per achievement</td><td>Niet flexibel. Nieuwe achievement = code wijziging + deployment.</td></tr>
+    <tr><td>Scripting engine (Roslyn, Lua)</td><td>Te zwaar voor simpele regels. Beveiligingsrisico bij user input.</td></tr>
+    <tr><td>Specification Pattern</td><td>Vergelijkbaar maar minder geschikt voor string-based regels. Specification werkt beter met typed predicates.</td></tr>
+</table>
+
+<h3>6.7 Uitbreidbaarheid</h3>
+<p>Nieuwe operators (bijv. <code>"contains"</code>, <code>"between"</code>) of nieuwe expression types (bijv. <code>NotExpression</code>) toevoegen door een nieuwe <code>IExpression</code> implementatie te maken en de parser uit te breiden.</p>
+
+<!-- 7. OBSERVER -->
+<h2>7. Observer Pattern</h2>
+
+<table>
+    <tr><th>GoF Categorie</th><td>Behavioral</td></tr>
+    <tr><th>Punten</th><td>4</td></tr>
+    <tr><th>Bestanden</th><td>7 bronbestanden, 6 tests</td></tr>
+</table>
+
+<h3>7.1 Probleem</h3>
+<p>Wanneer een quest wordt voltooid, moeten meerdere onafhankelijke acties plaatsvinden: XP berekenen, achievements checken, leaderboard bijwerken, notificaties versturen. Zonder Observer zou de QuestService al deze logica direct moeten aanroepen, wat tight coupling creert. Bij elke nieuwe actie moet de service worden aangepast.</p>
+
+<h3>7.2 Oplossing</h3>
+<p>Het Observer pattern definieert een one-to-many relatie: de <code>QuestEventPublisher</code> notifieert alle geregistreerde subscribers wanneer een quest wordt voltooid. Subscribers zijn losgekoppeld van de publisher en van elkaar.</p>
+
+<h3>7.3 Class Diagram</h3>
+<div class="diagram">
+    +------------------------+        +-------------------------+
+    | IQuestEventPublisher   |        | IQuestEventSubscriber   |
+    +------------------------+        +-------------------------+
+    | +Subscribe(sub)        |        | +Name: string           |
+    | +Unsubscribe(sub)      |        | +OnQuestCompleted(evt)  |
+    | +Notify(evt)           |        +-------------------------+
+    | +GetSubscribers()      |           ^         ^         ^
+    +------------------------+           |         |         |
+              |                    +--------+ +----------+ +----------+
+              v                    |XpCalc  | |Achievement| |Leaderboard|
+    +------------------------+    |Sub     | |CheckerSub | |UpdaterSub |
+    | QuestEventPublisher    |    +--------+ +----------+ +----------+
+    +------------------------+    |+XP/Gold| |+DSL eval  | |+score    |
+    | -_subscribers: List    |    |+level  | |+badges    | |+ranking  |
+    +------------------------+    +--------+ +----------+ +----------+
+
+    QuestService --> Publisher.Notify(evt) --> alle subscribers
+</div>
+
+<h3>7.4 Implementatie</h3>
+<pre>
+// Event data
+public class QuestCompletedEvent
+{
+    public Quest Quest { get; }
+    public Freelancer Freelancer { get; }
+    public decimal GoldEarned { get; }
+    public int XpEarned { get; }
+}
+
+// Publisher - beheert subscribers en stuurt events
+public class QuestEventPublisher : IQuestEventPublisher
+{
+    private readonly List&lt;IQuestEventSubscriber&gt; _subscribers = new();
+
+    public void Subscribe(IQuestEventSubscriber subscriber) => _subscribers.Add(subscriber);
+    public void Unsubscribe(IQuestEventSubscriber subscriber) => _subscribers.Remove(subscriber);
+
+    public void Notify(QuestCompletedEvent evt)
+    {
+        foreach (var subscriber in _subscribers)
+            subscriber.OnQuestCompleted(evt);
+    }
+}
+
+// Subscriber - reageert op quest completion
+public class XpCalculatorSubscriber : IQuestEventSubscriber
+{
+    public string Name => "XpCalculator";
+
+    public void OnQuestCompleted(QuestCompletedEvent evt)
+    {
+        evt.Freelancer.Xp += evt.XpEarned;
+        evt.Freelancer.Gold += evt.GoldEarned;
+        evt.Freelancer.Level = 1 + (evt.Freelancer.Xp / 1000);
+        evt.Freelancer.QuestsCompleted++;
+    }
+}
+
+// Wiring in Program.cs
+publisher.Subscribe(app.Services.GetRequiredService&lt;XpCalculatorSubscriber&gt;());
+publisher.Subscribe(app.Services.GetRequiredService&lt;AchievementCheckerSubscriber&gt;());
+publisher.Subscribe(app.Services.GetRequiredService&lt;LeaderboardUpdaterSubscriber&gt;());
+</pre>
+
+<h3>7.5 Voordelen en Nadelen</h3>
+<ul>
+    <li class="pro"><strong>+</strong> Losse koppeling: publisher kent subscribers niet bij naam</li>
+    <li class="pro"><strong>+</strong> Nieuwe subscriber toevoegen zonder bestaande code aan te passen</li>
+    <li class="pro"><strong>+</strong> Subscribers zijn onafhankelijk testbaar</li>
+    <li class="con"><strong>-</strong> Volgorde van notificatie kan relevant zijn (XP moet voor achievements)</li>
+    <li class="con"><strong>-</strong> Debugging lastig: event flow niet direct zichtbaar in code</li>
+</ul>
+
+<h3>7.6 Alternatieven</h3>
+<table>
+    <tr><th>Alternatief</th><th>Waarom niet gekozen</th></tr>
+    <tr><td>C# events/delegates</td><td>Werkt, maar minder expliciet en moeilijker te documenteren voor een schoolopdracht. Custom interfaces tonen het pattern duidelijker.</td></tr>
+    <tr><td>Mediator (MediatR)</td><td>Externe dependency. Observer is eenvoudiger en toont het pattern puurder.</td></tr>
+    <tr><td>Directe method calls in service</td><td>Tight coupling. Elke nieuwe actie vereist aanpassing van QuestService.</td></tr>
+</table>
+
+<h3>7.7 Uitbreidbaarheid</h3>
+<p>Een nieuwe subscriber (bijv. <code>EmailNotificationSubscriber</code>, <code>AnalyticsSubscriber</code>) toevoegen vereist:</p>
+<ol>
+    <li>Nieuwe klasse die <code>IQuestEventSubscriber</code> implementeert</li>
+    <li>Registreren in DI en subscriben bij de publisher in Program.cs</li>
+</ol>
+<p>De QuestService en andere subscribers hoeven niet te worden aangepast.</p>
+
+<!-- 8. SAMENWERKING -->
+<h2>8. Pattern Samenwerking</h2>
+
+<p>De kracht van dit project zit in hoe de 6 patterns samenwerken in de quest completion flow:</p>
+
+<div class="diagram">
+1. Quest wordt aangemaakt
+   Strategy: IPricingStrategy berekent de prijs (Fixed/Auction/Dynamic)
+
+2. Quest wordt weergegeven
+   Decorator: UrgentDecorator + FeaturedDecorator + TeamDecorator
+   stapelen tags, XP-bonussen en gold-multipliers
+
+3. Quest wordt voltooid
+   Observer: QuestEventPublisher.Notify() stuurt event naar 3 subscribers:
+
+   3a. XpCalculatorSubscriber
+       Voegt XP en Gold toe, berekent level-up
+
+   3b. AchievementCheckerSubscriber
+       Interpreter: AchievementRuleParser parsed DSL regels naar expression tree
+       Evalueert regels tegen freelancer stats
+       Flyweight: BadgeFactory.GetBadge() retourneert gedeeld badge-object
+       Bridge: AchievementAlert + EmailSender stuurt notificatie
+
+   3c. LeaderboardUpdaterSubscriber
+       Update leaderboard scores
+</div>
+
+<p>Elk pattern lost een specifiek probleem op, en samen vormen ze een flexibel, uitbreidbaar systeem waar nieuwe pricing modellen, quest modifiers, notificatiekanalen, achievement regels en event reacties kunnen worden toegevoegd zonder bestaande code te wijzigen.</p>
+
+</body>
+</html>

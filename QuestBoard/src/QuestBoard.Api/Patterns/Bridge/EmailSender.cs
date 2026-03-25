@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Bridge;
 
+// [PATTERN: Bridge] Concrete implementor — email kanaal
 public class EmailSender : INotificationSender
 {
     public string Channel => "Email";

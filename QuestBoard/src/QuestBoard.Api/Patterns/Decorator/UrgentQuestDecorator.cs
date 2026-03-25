@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Decorator;
 
+// [PATTERN: Decorator] Urgency premium: 1.5x gold, 2x XP
 public class UrgentQuestDecorator : QuestDecorator
 {
     public UrgentQuestDecorator(IQuestBehavior inner) : base(inner) { }

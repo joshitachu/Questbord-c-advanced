@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Interpreter;
 
+// [PATTERN: Interpreter] Non-terminal expression — logische OR combinatie
 /// <summary>
 /// Non-terminal expression that combines two expressions with logical OR.
 /// </summary>

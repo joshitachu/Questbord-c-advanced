@@ -107,3 +107,4 @@
 /Users/joshuakabel/Documents/Source/c#/QuestBoard/tests/QuestBoard.Tests/obj/Debug/net10.0/ref/QuestBoard.Tests.dll
 /Users/joshuakabel/Documents/Source/c#/QuestBoard/tests/QuestBoard.Tests/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerUI.dll
 /Users/joshuakabel/Documents/Source/c#/QuestBoard/tests/QuestBoard.Tests/bin/Debug/net10.0/QuestBoard.Api.staticwebassets.runtime.json
+/Users/joshuakabel/Documents/Source/c#/QuestBoard/tests/QuestBoard.Tests/obj/Debug/net10.0/QuestBoard.Tests.sourcelink.json

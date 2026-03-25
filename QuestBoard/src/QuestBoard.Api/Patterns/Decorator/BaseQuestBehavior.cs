@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Decorator;
 
+// [PATTERN: Decorator] Basis quest gedrag zonder modifiers — startpunt voor decorator chain
 public class BaseQuestBehavior : IQuestBehavior
 {
     public decimal CalculateGold(decimal baseGold) => baseGold;

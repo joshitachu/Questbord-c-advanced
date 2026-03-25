@@ -34,3 +34,4 @@
 /Users/joshuakabel/Documents/Source/c#/QuestBoard/src/QuestBoard.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerUI.dll
 /Users/joshuakabel/Documents/Source/c#/QuestBoard/src/QuestBoard.Api/bin/Debug/net10.0/QuestBoard.Api.staticwebassets.runtime.json
 /Users/joshuakabel/Documents/Source/c#/QuestBoard/src/QuestBoard.Api/obj/Debug/net10.0/compressed/abfolcn3qj-{0}-mbg4mlajy9-mbg4mlajy9.gz
+/Users/joshuakabel/Documents/Source/c#/QuestBoard/src/QuestBoard.Api/obj/Debug/net10.0/QuestBoard.Api.sourcelink.json

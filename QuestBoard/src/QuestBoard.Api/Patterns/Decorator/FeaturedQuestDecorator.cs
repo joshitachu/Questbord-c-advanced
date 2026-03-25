@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Decorator;
 
+// [PATTERN: Decorator] Featured bonus: 1.2x gold, +50 XP
 public class FeaturedQuestDecorator : QuestDecorator
 {
     public FeaturedQuestDecorator(IQuestBehavior inner) : base(inner) { }

@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Interpreter;
 
+// [PATTERN: Interpreter] Parser — zet DSL string om naar expression tree
 /// <summary>
 /// Parses achievement DSL rule strings into an expression tree.
 /// Supports comparisons (property operator value), "and" / "or" keywords.

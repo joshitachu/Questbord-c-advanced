@@ -29,7 +29,7 @@ public class AchievementsController : ControllerBase
         try
         {
             var result = _achievementService.CreateAchievement(dto);
-            return Ok(result);
+            return Created($"/api/achievements/{result.Id}", result);
         }
         catch (FormatException ex)
         {

@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Decorator;
 
+// [PATTERN: Decorator] Abstracte decorator — delegeert standaard naar het inner object
 public abstract class QuestDecorator : IQuestBehavior
 {
     protected readonly IQuestBehavior _inner;

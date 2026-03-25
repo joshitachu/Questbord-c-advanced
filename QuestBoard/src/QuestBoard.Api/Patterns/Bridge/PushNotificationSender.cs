@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Bridge;
 
+// [PATTERN: Bridge] Concrete implementor — push notification kanaal
 public class PushNotificationSender : INotificationSender
 {
     public string Channel => "Push";

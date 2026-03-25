@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Bridge;
 
+// [PATTERN: Bridge] Refined abstractie — quest status notificatie
 public class QuestAlert : Notification
 {
     public string QuestTitle { get; }

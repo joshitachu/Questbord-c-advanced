@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Decorator;
 
+// [PATTERN: Decorator] Team modifier: gold * teamSize, XP penalty per lid
 public class TeamQuestDecorator : QuestDecorator
 {
     private readonly int _teamSize;

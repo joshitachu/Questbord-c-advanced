@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Interpreter;
 
+// [PATTERN: Interpreter] Terminal expression — vergelijkt een property met een waarde
 /// <summary>
 /// Terminal expression that compares a context property against a value using a comparison operator.
 /// Supported operators: ">", ">=", "&lt;", "&lt;=", "=="

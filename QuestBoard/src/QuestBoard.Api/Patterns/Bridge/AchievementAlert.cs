@@ -1,5 +1,6 @@
 namespace QuestBoard.Api.Patterns.Bridge;
 
+// [PATTERN: Bridge] Refined abstractie — achievement unlock notificatie
 public class AchievementAlert : Notification
 {
     public string AchievementName { get; }
