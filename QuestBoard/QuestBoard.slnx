@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/QuestBoard.Api/QuestBoard.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/QuestBoard.Tests/QuestBoard.Tests.csproj" />
+  </Folder>
+</Solution>
