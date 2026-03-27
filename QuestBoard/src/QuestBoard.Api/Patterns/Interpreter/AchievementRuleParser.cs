@@ -1,5 +1,12 @@
 namespace QuestBoard.Api.Patterns.Interpreter;
 
+// [EIGEN INBRENG: DSL Achievement Engine]
+// Zelfontworpen Domain-Specific Language (DSL) waarmee achievement-regels als leesbare strings
+// worden gedefinieerd (bv. "quests.completed >= 10 and rating.avg >= 4.5").
+// De parser bouwt een expression tree op (Composite pattern) met AND/OR-precedentie,
+// die vervolgens wordt geevalueerd tegen freelancer-statistieken via het Interpreter pattern.
+// Dit maakt het mogelijk om nieuwe achievements toe te voegen zonder code-wijzigingen.
+
 // [PATTERN: Interpreter] Parser — zet DSL string om naar expression tree
 /// <summary>
 /// Parses achievement DSL rule strings into an expression tree.

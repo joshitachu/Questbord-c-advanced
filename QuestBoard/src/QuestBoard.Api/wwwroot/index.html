@@ -28,10 +28,6 @@
         h2 { color: #fff; margin-bottom: 1rem; font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 0.4rem; }
         h3 { color: #ccc; margin: 1rem 0 0.5rem; font-size: 0.95rem; }
 
-        .pattern-info { background: #1a1a2e; border-left: 3px solid #666; padding: 0.7rem 1rem; margin-bottom: 1rem; font-size: 0.82rem; color: #aaa; line-height: 1.5; }
-        .pattern-info strong { color: #ddd; }
-        .pattern-info code { color: #ccc; background: #222; padding: 0.1rem 0.3rem; border-radius: 2px; }
-
         .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 0.8rem; }
         .card { background: #1a1a2e; border: 1px solid #333; border-radius: 6px; padding: 1rem; }
 
@@ -100,6 +96,72 @@
         .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #333; color: #fff; padding: 0.6rem 1rem; border-radius: 4px; font-size: 0.82rem; z-index: 200; display: none; border: 1px solid #555; max-width: 400px; }
         .toast.error { border-color: #933; }
         .toast.signalr { border-color: #4a4; background: #1a2a1a; }
+
+        /* Hoe Werkt Het */
+        .demo-steps { background: #0a0a14; border: 1px solid #333; border-radius: 6px; padding: 1rem 1.2rem; }
+        .demo-step { padding: 0.6rem 0; border-bottom: 1px solid #222; }
+        .demo-step:last-child { border-bottom: none; }
+        .demo-step-num { display: inline-block; background: #333; color: #fff; border-radius: 50%; width: 1.4rem; height: 1.4rem; text-align: center; line-height: 1.4rem; font-size: 0.72rem; font-weight: 600; margin-right: 0.5rem; }
+        .demo-step-title { color: #fff; font-weight: 600; font-size: 0.85rem; }
+        .demo-step-desc { color: #aaa; font-size: 0.78rem; margin-top: 0.2rem; padding-left: 1.9rem; line-height: 1.4; }
+
+        /* Evaluation result cards */
+        .eval-card { background: #1a1a2e; border: 1px solid #333; border-radius: 6px; padding: 0.7rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.8rem; }
+        .eval-card.achieved { border-color: #4a4; }
+        .eval-card.not-achieved { border-color: #444; opacity: 0.7; }
+        .eval-icon { font-size: 1.2rem; }
+        .eval-info { flex: 1; }
+        .eval-name { color: #fff; font-weight: 600; font-size: 0.85rem; }
+        .eval-rule { font-family: monospace; font-size: 0.75rem; color: #888; margin-top: 0.15rem; }
+        .eval-badge { font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 600; }
+        .eval-badge.pass { background: #1a3a1a; color: #4d4; }
+        .eval-badge.fail { background: #2a1a1a; color: #a66; }
+
+        /* Notification result card */
+        .notif-card { background: #1a1a2e; border: 1px solid #333; border-radius: 6px; padding: 0.8rem; margin-top: 0.6rem; }
+        .notif-card .notif-row { display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: 0.82rem; }
+        .notif-card .notif-label { color: #888; }
+        .notif-card .notif-value { color: #ddd; }
+
+        /* Completion result card */
+        .completion-card { background: #0a0a14; border: 1px solid #333; border-radius: 6px; padding: 0.8rem; margin-top: 0.6rem; }
+        .completion-stats { display: flex; gap: 1.5rem; margin-bottom: 0.6rem; }
+        .completion-stat { text-align: center; }
+        .completion-stat .value { font-size: 1.2rem; font-weight: 700; }
+        .completion-stat .label { font-size: 0.72rem; color: #888; }
+
+        /* Welcome Modal */
+        .welcome-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 300; align-items: center; justify-content: center; }
+        .welcome-overlay.show { display: flex; }
+        .welcome-modal { background: #1a1a2e; border: 1px solid #555; border-radius: 10px; padding: 2rem; max-width: 520px; width: 90%; text-align: center; }
+        .welcome-modal h2 { color: #fff; font-size: 1.3rem; margin-bottom: 0.3rem; border: none; padding: 0; }
+        .welcome-modal .welcome-subtitle { color: #888; font-size: 0.85rem; margin-bottom: 1.2rem; }
+        .welcome-steps { text-align: left; margin: 1rem 0; }
+        .welcome-steps .w-step { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.5rem 0; }
+        .welcome-steps .w-step-num { background: #333; color: #fff; border-radius: 50%; min-width: 1.5rem; height: 1.5rem; text-align: center; line-height: 1.5rem; font-size: 0.75rem; font-weight: 700; }
+        .welcome-steps .w-step-text { color: #ccc; font-size: 0.85rem; line-height: 1.4; }
+        .welcome-steps .w-step-text strong { color: #fff; }
+        .btn-start { background: #2a4a2a; color: #4d4; border: 1px solid #4a4; padding: 0.6rem 2rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 0.8rem; }
+        .btn-start:hover { background: #3a5a3a; }
+        .btn-help { background: none; border: 1px solid #555; color: #aaa; width: 1.7rem; height: 1.7rem; border-radius: 50%; cursor: pointer; font-size: 0.85rem; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; }
+        .btn-help:hover { border-color: #888; color: #fff; }
+
+        /* Quest Create Form */
+        .create-form { background: #0a0a14; border: 1px solid #333; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+        .create-form h3 { color: #fff; margin-bottom: 0.8rem; font-size: 0.95rem; border: none; padding: 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.2rem; }
+        .form-group label { font-size: 0.75rem; color: #888; font-weight: 600; text-transform: uppercase; }
+        .form-group input, .form-group select, .form-group textarea { background: #1a1a2e; color: #ccc; border: 1px solid #444; padding: 0.4rem 0.5rem; border-radius: 4px; font-size: 0.82rem; font-family: inherit; }
+        .form-group textarea { resize: vertical; min-height: 50px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-actions { grid-column: 1 / -1; display: flex; gap: 0.5rem; margin-top: 0.3rem; }
+        .btn-create { background: #2a4a2a; color: #4d4; border: 1px solid #4a4; }
+        .btn-create:hover { background: #3a5a3a; }
+        .btn-toggle { font-size: 0.78rem; }
+        .form-checks { display: flex; gap: 1rem; align-items: center; grid-column: 1 / -1; }
+        .form-checks label { font-size: 0.82rem; color: #ccc; display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+        .form-checks input[type="checkbox"] { accent-color: #4d4; }
     </style>
 </head>
 <body>
@@ -111,44 +173,98 @@
             <button onclick="showSection('leaderboard')">Leaderboard</button>
             <button onclick="showSection('achievements')">Achievements</button>
             <button onclick="showSection('notifications')">Notifications</button>
-            <button onclick="showSection('flyweight')">Flyweight Stats</button>
+            <button onclick="showSection('flyweight')">Skills & Badges</button>
+            <button onclick="showSection('howworks')">Hoe Werkt Het</button>
             <span id="connection-status" class="connection-status disconnected">Offline</span>
+            <button class="btn-help" onclick="showWelcome()" title="Help / Tutorial">?</button>
         </div>
     </header>
 
     <main>
         <div id="sec-quests" class="section active">
             <h2>Quests</h2>
-            <div class="pattern-info">
-                <strong>[Strategy]</strong> Pricing via IPricingStrategy (Fixed/Auction/Dynamic).
-                <strong>[Decorator]</strong> Quest modifiers (Urgent/Featured/Team) gestapeld.
-                <strong>[Observer]</strong> Bij voltooien: XpCalculator + AchievementChecker + LeaderboardUpdater.
-                <strong>[Builder]</strong> Quest objecten gebouwd via fluent QuestBuilder.
-                <strong>[Producer-Consumer]</strong> Events verwerkt op background thread via EventQueue.
-                <strong>[Monitor]</strong> AcceptQuest beschermd met per-quest lock.
-                <strong>[SignalR]</strong> Real-time updates via WebSocket verbinding.
-            </div>
             <div class="freelancer-select">
                 <label>Actieve freelancer:</label>
                 <select id="freelancer-select" onchange="selectedFreelancer = this.value"></select>
+                <button class="btn btn-toggle" onclick="toggleCreateForm()">+ Nieuwe Quest</button>
+            </div>
+            <div id="create-quest-form" class="create-form" style="display:none">
+                <h3>Nieuwe Quest Aanmaken</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Titel</label>
+                        <input id="cq-title" placeholder="Quest titel..." maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Client</label>
+                        <select id="cq-client"></select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Beschrijving</label>
+                        <textarea id="cq-description" placeholder="Beschrijf de quest..." maxlength="1000"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Moeilijkheid</label>
+                        <select id="cq-difficulty">
+                            <option value="0">Easy</option>
+                            <option value="1" selected>Medium</option>
+                            <option value="2">Hard</option>
+                            <option value="3">Epic</option>
+                            <option value="4">Legendary</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="cq-type">
+                            <option value="0">Development</option>
+                            <option value="1">Design</option>
+                            <option value="2">Writing</option>
+                            <option value="3">Testing</option>
+                            <option value="4">DevOps</option>
+                            <option value="5">DataScience</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pricing Strategy</label>
+                        <select id="cq-pricing">
+                            <option value="0">Fixed</option>
+                            <option value="1">Auction</option>
+                            <option value="2">Dynamic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Base Gold</label>
+                        <input id="cq-gold" type="number" value="500" min="0" max="100000">
+                    </div>
+                    <div class="form-group">
+                        <label>Base XP</label>
+                        <input id="cq-xp" type="number" value="200" min="0" max="50000">
+                    </div>
+                    <div class="form-group">
+                        <label>Skills (komma-gescheiden)</label>
+                        <input id="cq-skills" placeholder="C#, React, Docker...">
+                    </div>
+                    <div class="form-checks">
+                        <label><input type="checkbox" id="cq-urgent"> Urgent</label>
+                        <label><input type="checkbox" id="cq-featured"> Featured</label>
+                        <label><input type="checkbox" id="cq-team"> Team Quest</label>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-create" onclick="createQuest()">Aanmaken</button>
+                        <button class="btn" onclick="toggleCreateForm()">Annuleren</button>
+                    </div>
+                </div>
             </div>
             <div id="quests-list" class="cards"></div>
         </div>
 
         <div id="sec-freelancers" class="section">
             <h2>Freelancers</h2>
-            <div class="pattern-info">
-                <strong>[Flyweight]</strong> Skills en badges worden gedeeld via SkillFactory en BadgeFactory pools.
-            </div>
             <div id="freelancers-list" class="cards"></div>
         </div>
 
         <div id="sec-leaderboard" class="section">
             <h2>Leaderboard</h2>
-            <div class="pattern-info">
-                <strong>[Observer]</strong> LeaderboardUpdaterSubscriber update scores automatisch na quest completion.
-                <strong>[SignalR]</strong> Leaderboard wordt real-time bijgewerkt via WebSocket.
-            </div>
             <table>
                 <thead><tr><th>#</th><th>Naam</th><th>Level</th><th>Score</th><th>Quests</th><th>Badges</th></tr></thead>
                 <tbody id="leaderboard-body"></tbody>
@@ -157,10 +273,6 @@
 
         <div id="sec-achievements" class="section">
             <h2>Achievements</h2>
-            <div class="pattern-info">
-                <strong>[Interpreter]</strong> Achievement regels in DSL: <code>quests.completed >= 10 and rating.avg > 4.5</code>.
-                AchievementRuleParser parsed strings naar een expression tree.
-            </div>
             <div class="freelancer-select">
                 <label>Evalueer voor:</label>
                 <select id="eval-freelancer-select"></select>
@@ -172,20 +284,16 @@
         </div>
 
         <div id="sec-notifications" class="section">
-            <h2>Notifications (Bridge Pattern)</h2>
-            <div class="pattern-info">
-                <strong>[Bridge]</strong> Abstractie (QuestAlert / AchievementAlert) x implementatie (Email / Push / Webhook).
-                2 types x 3 kanalen = 6 combinaties zonder 6 klassen.
-            </div>
+            <h2>Notifications</h2>
             <div class="notification-form">
                 <select id="notif-type">
-                    <option value="quest">QuestAlert</option>
-                    <option value="achievement">AchievementAlert</option>
+                    <option value="quest">Quest Alert</option>
+                    <option value="achievement">Achievement Alert</option>
                 </select>
                 <select id="notif-channel">
-                    <option value="email">EmailSender</option>
-                    <option value="push">PushNotificationSender</option>
-                    <option value="webhook">WebhookSender</option>
+                    <option value="email">Email</option>
+                    <option value="push">Push Notification</option>
+                    <option value="webhook">Webhook</option>
                 </select>
                 <input id="notif-message" placeholder="Message..." value="Test Quest">
                 <input id="notif-recipient" placeholder="Recipient..." value="alice@dev.nl">
@@ -195,18 +303,51 @@
         </div>
 
         <div id="sec-flyweight" class="section">
-            <h2>Flyweight Stats</h2>
-            <div class="pattern-info">
-                <strong>[Flyweight]</strong> Gedeelde objecten via factory pools. Meerdere freelancers met dezelfde skill/badge verwijzen naar hetzelfde object. <code>ReferenceEquals(skill1, skill2) == true</code>
-            </div>
+            <h2>Skills & Badges</h2>
             <div class="flyweight-grid">
                 <div>
-                    <h3 id="skills-header">Skills Pool</h3>
+                    <h3 id="skills-header">Skills</h3>
                     <ul id="skills-pool" class="pool-list"></ul>
                 </div>
                 <div>
-                    <h3 id="badges-header">Badges Pool</h3>
+                    <h3 id="badges-header">Badges</h3>
                     <ul id="badges-pool" class="pool-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div id="sec-howworks" class="section">
+            <h2>Hoe Werkt Het</h2>
+
+            <div class="demo-steps">
+                <div class="demo-step">
+                    <span class="demo-step-num">1</span>
+                    <span class="demo-step-title">Bekijk de Quests</span>
+                    <div class="demo-step-desc">Ga naar het <strong>Quests</strong> tabblad. Je ziet quests met verschillende tags (Urgent, Featured, Team), moeilijkheidsgraden en types.</div>
+                </div>
+                <div class="demo-step">
+                    <span class="demo-step-num">2</span>
+                    <span class="demo-step-title">Accepteer een Quest</span>
+                    <div class="demo-step-desc">Selecteer een freelancer bovenaan en klik <strong>Accept</strong> op een open quest. De status verandert naar InProgress.</div>
+                </div>
+                <div class="demo-step">
+                    <span class="demo-step-num">3</span>
+                    <span class="demo-step-title">Voltooi de Quest</span>
+                    <div class="demo-step-desc">Klik <strong>Complete</strong> op een geaccepteerde quest. Je verdient XP en Gold, achievements worden gecheckt en het leaderboard wordt bijgewerkt.</div>
+                </div>
+                <div class="demo-step">
+                    <span class="demo-step-num">4</span>
+                    <span class="demo-step-title">Check het Leaderboard</span>
+                    <div class="demo-step-desc">Ga naar <strong>Leaderboard</strong> — scores worden automatisch bijgewerkt na elke voltooide quest. Met een actieve verbinding gebeurt dit real-time.</div>
+                </div>
+                <div class="demo-step">
+                    <span class="demo-step-num">5</span>
+                    <span class="demo-step-title">Evalueer Achievements</span>
+                    <div class="demo-step-desc">Ga naar <strong>Achievements</strong>, selecteer een freelancer en klik <strong>Evalueer</strong>. Je ziet welke achievements behaald zijn op basis van je voortgang.</div>
+                </div>
+                <div class="demo-step">
+                    <span class="demo-step-num">6</span>
+                    <span class="demo-step-title">Test Notificaties</span>
+                    <div class="demo-step-desc">Ga naar <strong>Notifications</strong> en kies een combinatie van type en kanaal (Email/Push/Webhook) om een testbericht te versturen.</div>
                 </div>
             </div>
         </div>
@@ -220,6 +361,32 @@
         </div>
     </div>
     <div id="toast" class="toast"></div>
+
+    <div id="welcome-overlay" class="welcome-overlay" onclick="if(event.target===this)closeWelcome()">
+        <div class="welcome-modal">
+            <h2>Welkom bij QuestBoard</h2>
+            <p class="welcome-subtitle">Gamified Freelance Platform</p>
+            <div class="welcome-steps">
+                <div class="w-step">
+                    <span class="w-step-num">1</span>
+                    <span class="w-step-text">Selecteer een <strong>freelancer</strong> bovenaan de Quests pagina</span>
+                </div>
+                <div class="w-step">
+                    <span class="w-step-num">2</span>
+                    <span class="w-step-text">Klik <strong>Accept</strong> op een open quest om deze aan te nemen</span>
+                </div>
+                <div class="w-step">
+                    <span class="w-step-num">3</span>
+                    <span class="w-step-text">Klik <strong>Complete</strong> om de quest te voltooien en XP/Gold te verdienen</span>
+                </div>
+                <div class="w-step">
+                    <span class="w-step-num">4</span>
+                    <span class="w-step-text">Bekijk het <strong>Leaderboard</strong> en evalueer <strong>Achievements</strong></span>
+                </div>
+            </div>
+            <button class="btn-start" onclick="closeWelcome()">Start</button>
+        </div>
+    </div>
 
     <!-- SignalR JS Client -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
@@ -252,6 +419,21 @@
             if (name === 'leaderboard') loadLeaderboard();
             if (name === 'achievements') loadAchievements();
             if (name === 'flyweight') loadFlyweightStats();
+        }
+
+        function navigateToSection(name) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + name).classList.add('active');
+            document.querySelectorAll('.nav button').forEach(b => {
+                b.classList.remove('active');
+                if (b.textContent.toLowerCase().includes(name === 'howworks' ? 'hoe' : name.substring(0, 4))) b.classList.add('active');
+            });
+            if (name === 'quests') loadQuests();
+            if (name === 'freelancers') loadFreelancers();
+            if (name === 'leaderboard') loadLeaderboard();
+            if (name === 'achievements') loadAchievements();
+            if (name === 'flyweight') loadFlyweightStats();
+            window.scrollTo(0, 0);
         }
 
         function openModal(title, html) {
@@ -295,9 +477,62 @@
                 + '<div class="actions">'
                 + (q.status === 0 ? '<button class="btn btn-accept" onclick="acceptQuest(\'' + q.id + '\')">Accept</button>' : '')
                 + (q.status === 1 ? '<button class="btn btn-complete" onclick="completeQuest(\'' + q.id + '\')">Complete</button>' : '')
-                + (q.status === 0 ? '<button class="btn btn-match" onclick="getMatches(\'' + q.id + '\')">Matches</button>' : '')
+                + (q.status === 0 ? '<select id="strat-' + q.id + '" style="font-size:0.75rem;padding:0.25rem"><option value="SkillBased">SkillBased</option><option value="RatingBased">RatingBased</option></select><button class="btn btn-match" onclick="getMatches(\'' + q.id + '\')">Matches</button>' : '')
                 + '</div></div>'
             ).join('');
+        }
+
+        function toggleCreateForm() {
+            const form = document.getElementById('create-quest-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            if (form.style.display === 'block') loadClients();
+        }
+
+        async function loadClients() {
+            try {
+                const clients = await api('/api/debug/clients');
+                document.getElementById('cq-client').innerHTML = clients.map(c =>
+                    '<option value="' + c.id + '">' + c.name + ' (' + c.company + ')</option>'
+                ).join('');
+            } catch(e) { toast('Fout bij laden clients: ' + e.message, true); }
+        }
+
+        async function createQuest() {
+            const title = document.getElementById('cq-title').value.trim();
+            const description = document.getElementById('cq-description').value.trim();
+            if (!title || title.length < 3) { toast('Titel moet minimaal 3 tekens zijn', true); return; }
+            if (!description || description.length < 10) { toast('Beschrijving moet minimaal 10 tekens zijn', true); return; }
+
+            const skillsRaw = document.getElementById('cq-skills').value.trim();
+            const skills = skillsRaw ? skillsRaw.split(',').map(s => s.trim()).filter(s => s) : [];
+
+            const body = JSON.stringify({
+                title: title,
+                description: description,
+                clientId: document.getElementById('cq-client').value,
+                difficulty: parseInt(document.getElementById('cq-difficulty').value),
+                type: parseInt(document.getElementById('cq-type').value),
+                pricingType: parseInt(document.getElementById('cq-pricing').value),
+                baseGold: parseFloat(document.getElementById('cq-gold').value) || 500,
+                baseXp: parseInt(document.getElementById('cq-xp').value) || 200,
+                requiredSkills: skills,
+                isUrgent: document.getElementById('cq-urgent').checked,
+                isFeatured: document.getElementById('cq-featured').checked,
+                isTeamQuest: document.getElementById('cq-team').checked,
+                maxTeamSize: document.getElementById('cq-team').checked ? 3 : 1
+            });
+
+            try {
+                const result = await api('/api/quests', { method: 'POST', body: body });
+                const pricingNames = ['Fixed', 'Auction', 'Dynamic'];
+                const pricingIdx = parseInt(document.getElementById('cq-pricing').value);
+                toast('Quest "' + result.title + '" aangemaakt! (Pricing: ' + pricingNames[pricingIdx] + ', ' + result.gold + ' Gold)');
+                document.getElementById('create-quest-form').style.display = 'none';
+                document.getElementById('cq-title').value = '';
+                document.getElementById('cq-description').value = '';
+                document.getElementById('cq-skills').value = '';
+                loadQuests();
+            } catch(e) { toast('Fout: ' + e.message, true); }
         }
 
         async function acceptQuest(id) {
@@ -312,27 +547,35 @@
         async function completeQuest(id) {
             try {
                 const result = await api('/api/quests/' + id + '/complete', { method: 'POST' });
-                toast('Quest voltooid — events worden verwerkt via Producer-Consumer queue');
+                toast('Quest voltooid!');
                 loadQuests();
                 loadFreelancerSelects();
                 openModal('Quest Voltooid', ''
-                    + '<p>Observer subscribers genotificeerd via Producer-Consumer queue:</p>'
-                    + '<ul style="margin:0.5rem 0;padding-left:1.2rem;color:#aaa">'
-                    + '<li>XpCalculatorSubscriber - XP en Gold toegevoegd</li>'
-                    + '<li>AchievementCheckerSubscriber - DSL regels ge-evalueerd</li>'
-                    + '<li>LeaderboardUpdaterSubscriber - Score bijgewerkt</li>'
-                    + '<li>SignalRBroadcasterSubscriber - Real-time update verstuurd</li>'
-                    + '</ul>'
-                    + '<div class="result-box">' + JSON.stringify(result, null, 2) + '</div>'
+                    + '<div class="completion-card">'
+                    + '<div class="card-title" style="margin-bottom:0.5rem">' + (result.title || 'Quest') + '</div>'
+                    + '<div class="completion-stats">'
+                    + '<div class="completion-stat"><div class="value stat-xp">' + (result.xp || 0) + '</div><div class="label">XP Earned</div></div>'
+                    + '<div class="completion-stat"><div class="value stat-gold">' + (result.gold || 0) + '</div><div class="label">Gold Earned</div></div>'
+                    + '<div class="completion-stat"><div class="value stat-level">' + (result.status !== undefined ? statusNames[result.status] : 'Completed') + '</div><div class="label">Status</div></div>'
+                    + '</div></div>'
+                    + '<p style="margin-top:0.8rem;color:#aaa;font-size:0.82rem">Verwerkt:</p>'
+                    + '<div style="margin-top:0.5rem">'
+                    + '<div class="eval-card achieved"><span class="eval-icon">&#9889;</span><div class="eval-info"><div class="eval-name">XP & Gold</div><div class="eval-rule">XP en Gold berekend en toegevoegd</div></div><span class="eval-badge pass">Verwerkt</span></div>'
+                    + '<div class="eval-card achieved"><span class="eval-icon">&#127942;</span><div class="eval-info"><div class="eval-name">Achievements</div><div class="eval-rule">Achievement regels gecontroleerd</div></div><span class="eval-badge pass">Verwerkt</span></div>'
+                    + '<div class="eval-card achieved"><span class="eval-icon">&#128200;</span><div class="eval-info"><div class="eval-name">Leaderboard</div><div class="eval-rule">Leaderboard score bijgewerkt</div></div><span class="eval-badge pass">Verwerkt</span></div>'
+                    + '<div class="eval-card achieved"><span class="eval-icon">&#128225;</span><div class="eval-info"><div class="eval-name">Live Update</div><div class="eval-rule">Real-time update naar verbonden clients</div></div><span class="eval-badge pass">Verwerkt</span></div>'
+                    + '</div>'
                 );
             } catch(e) { toast('Fout: ' + e.message, true); }
         }
 
         async function getMatches(id) {
             try {
-                const matches = await api('/api/quests/' + id + '/matches?strategy=SkillBased');
+                const stratEl = document.getElementById('strat-' + id);
+                const strategy = stratEl ? stratEl.value : 'SkillBased';
+                const matches = await api('/api/quests/' + id + '/matches?strategy=' + strategy);
                 const rows = matches.map((m, i) => '<tr><td>' + (i+1) + '</td><td>' + m.freelancer.name + '</td><td>Lvl ' + m.freelancer.level + '</td><td>' + m.freelancer.skills.join(', ') + '</td><td>' + (m.score * 100).toFixed(0) + '%</td></tr>').join('');
-                openModal('Matchmaking (SkillBased)', '<table><thead><tr><th>#</th><th>Naam</th><th>Level</th><th>Skills</th><th>Match</th></tr></thead><tbody>' + rows + '</tbody></table>');
+                openModal('Best Matches (Strategy: ' + strategy + ')', '<table><thead><tr><th>#</th><th>Naam</th><th>Level</th><th>Skills</th><th>Match</th></tr></thead><tbody>' + rows + '</tbody></table>');
             } catch(e) { toast('Fout: ' + e.message, true); }
         }
 
@@ -385,8 +628,21 @@
                 const result = await api('/api/achievements/evaluate/' + fId, { method: 'POST' });
                 const box = document.getElementById('eval-results');
                 box.style.display = 'block';
-                box.textContent = JSON.stringify(result, null, 2);
-                toast('Achievements ge-evalueerd via Interpreter DSL');
+                if (Array.isArray(result)) {
+                    box.innerHTML = result.map(a => ''
+                        + '<div class="eval-card ' + (a.achieved ? 'achieved' : 'not-achieved') + '">'
+                        + '<span class="eval-icon">' + (a.achieved ? '&#9989;' : '&#10060;') + '</span>'
+                        + '<div class="eval-info">'
+                        + '<div class="eval-name">' + (a.name || a.achievementName || 'Achievement') + '</div>'
+                        + '<div class="eval-rule">' + (a.dslRule || a.rule || '') + '</div>'
+                        + '</div>'
+                        + '<span class="eval-badge ' + (a.achieved ? 'pass' : 'fail') + '">' + (a.achieved ? 'Behaald' : 'Niet behaald') + '</span>'
+                        + '</div>'
+                    ).join('');
+                } else {
+                    box.innerHTML = '<div class="eval-card achieved"><div class="eval-info"><div class="eval-name">Evaluatie resultaat</div><div class="eval-rule">' + JSON.stringify(result, null, 2) + '</div></div></div>';
+                }
+                toast('Achievements ge-evalueerd');
             } catch(e) { toast('Fout: ' + e.message, true); }
         }
 
@@ -401,15 +657,21 @@
                 const result = await api('/api/notifications/test', { method: 'POST', body: body });
                 const box = document.getElementById('notif-results');
                 box.style.display = 'block';
-                box.textContent = JSON.stringify(result, null, 2);
+                box.innerHTML = ''
+                    + '<div class="notif-card">'
+                    + '<div class="notif-row"><span class="notif-label">Kanaal</span><span class="notif-value">' + (result.channel || '-') + '</span></div>'
+                    + '<div class="notif-row"><span class="notif-label">Type</span><span class="notif-value">' + (result.type || '-') + '</span></div>'
+                    + '<div class="notif-row"><span class="notif-label">Resultaat</span><span class="notif-value">' + (result.result || '-') + '</span></div>'
+                    + '<div class="notif-row"><span class="notif-label">Totaal verstuurd</span><span class="notif-value">' + (result.totalNotificationsSent || 0) + '</span></div>'
+                    + '</div>';
                 toast('Notificatie verstuurd via ' + result.channel);
             } catch(e) { toast('Fout: ' + e.message, true); }
         }
 
         async function loadFlyweightStats() {
             const data = await api('/api/debug/flyweight-stats');
-            document.getElementById('skills-header').textContent = 'Skills Pool (' + data.skills.poolSize + ' objecten)';
-            document.getElementById('badges-header').textContent = 'Badges Pool (' + data.badges.poolSize + ' objecten)';
+            document.getElementById('skills-header').textContent = 'Skills (' + data.skills.poolSize + ')';
+            document.getElementById('badges-header').textContent = 'Badges (' + data.badges.poolSize + ')';
             document.getElementById('skills-pool').innerHTML = data.skills.items.map(s => '<li>' + s.name + ' <span class="cat">' + s.category + '</span></li>').join('');
             document.getElementById('badges-pool').innerHTML = data.badges.items.map(b => '<li>' + b.name + ' <span class="cat">' + b.tier + ' - ' + b.description + '</span></li>').join('');
         }
@@ -442,7 +704,7 @@
         });
 
         connection.on('QuestAccepted', function(data) {
-            toast('Quest geaccepteerd via real-time update', false, true);
+            toast('Quest geaccepteerd', false, true);
             loadQuests();
         });
 
@@ -452,7 +714,7 @@
 
         connection.onreconnected(function() {
             updateConnectionStatus('connected');
-            toast('SignalR verbinding hersteld', false, true);
+            toast('Verbinding hersteld', false, true);
         });
 
         connection.onclose(function() {
@@ -470,6 +732,17 @@
                 console.error('SignalR verbinding mislukt:', err);
                 setTimeout(startSignalR, 5000);
             }
+        }
+
+        function showWelcome() {
+            document.getElementById('welcome-overlay').classList.add('show');
+        }
+        function closeWelcome() {
+            document.getElementById('welcome-overlay').classList.remove('show');
+            localStorage.setItem('questboard-welcomed', 'true');
+        }
+        if (!localStorage.getItem('questboard-welcomed')) {
+            showWelcome();
         }
 
         loadFreelancerSelects();

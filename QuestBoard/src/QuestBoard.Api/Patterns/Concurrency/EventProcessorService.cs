@@ -2,6 +2,13 @@ using QuestBoard.Api.Patterns.Observer;
 
 namespace QuestBoard.Api.Patterns.Concurrency;
 
+// [EIGEN INBRENG: Async Event Processing via Producer-Consumer]
+// Eigen implementatie van het Producer-Consumer concurrency pattern met een
+// bounded Channel<T> als thread-safe queue. Quest-completion events worden
+// asynchroon verwerkt op een background thread (BackgroundService), waardoor
+// de HTTP request thread niet wordt geblokkeerd door de Observer chain.
+// Dit verbetert de responsiviteit van de API bij zware post-completion verwerking.
+
 // [PATTERN: Producer-Consumer] — Concurrency pattern (Consumer)
 // BackgroundService die continu events van de queue leest en doorgeeft
 // aan de Observer publisher. Events worden nu verwerkt op een background thread

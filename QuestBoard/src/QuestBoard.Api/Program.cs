@@ -1,5 +1,33 @@
+// ============================================================================
+// [EIGEN INBRENG: Master Overzicht]
+//
+// Dit project bevat de volgende creatieve toevoegingen bovenop de basis-eisen:
+//
+// 1. DSL Achievement Engine (Interpreter) — Eigen mini-taal voor achievement-regels
+//    → Patterns/Interpreter/AchievementRuleParser.cs
+// 2. Async Event Processing (Producer-Consumer) — Background event verwerking
+//    → Patterns/Concurrency/EventProcessorService.cs
+// 3. Fine-Grained Per-Quest Locking (Monitor) — Thread-safe quest acceptatie
+//    → Patterns/Concurrency/QuestAcceptanceLock.cs
+// 4. Real-Time Updates via Observer + SignalR — Live broadcasts naar frontend
+//    → Patterns/Observer/SignalRBroadcasterSubscriber.cs
+// 5. Cross-Pattern Integratie (Observer+Interpreter+Bridge+Flyweight)
+//    → Patterns/Observer/AchievementCheckerSubscriber.cs
+// 6. Fluent Builder met Validatie + Singleton-Defaults
+//    → Patterns/Creational/QuestBuilder.cs
+// 7. Dynamische Prijsberekening (Strategy) — Moeilijkheid + deadline urgentie
+//    → Patterns/Strategy/DynamicPricingStrategy.cs
+// 8. Custom Exception Hierarchy — Gestructureerde foutafhandeling
+//    → Exceptions/QuestBoardException.cs
+// 9. Global Exception Handling Middleware — Centraal exception → HTTP response
+//    → Middleware/GlobalExceptionHandlerMiddleware.cs
+// 10. Data Annotations + ModelState Validatie — Input-validatie op DTOs
+//    → Models/DTOs/CreateQuestDto.cs, FreelancerProfileDto.cs
+// ============================================================================
+
 using QuestBoard.Api.Data;
 using QuestBoard.Api.Hubs;
+using QuestBoard.Api.Middleware;
 using QuestBoard.Api.Models.Domain;
 using QuestBoard.Api.Patterns.Bridge;
 using QuestBoard.Api.Patterns.Concurrency;
@@ -74,6 +102,9 @@ publisher.Subscribe(app.Services.GetRequiredService<SignalRBroadcasterSubscriber
 // === Seed Data ===
 SeedData(app.Services);
 
+// === Global Exception Handling (eerste middleware in de pipeline) ===
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
 // === Middleware ===
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -105,6 +136,12 @@ app.MapGet("/api/debug/flyweight-stats", (SkillFactory skillFactory, BadgeFactor
         Message = "Flyweight pattern: objecten worden gedeeld via factory pools. " +
                   "Meerdere freelancers met dezelfde skill/badge verwijzen naar hetzelfde object in geheugen."
     });
+}).WithTags("Debug");
+
+// === Debug Endpoint: Clients List (voor frontend quest-create form) ===
+app.MapGet("/api/debug/clients", (InMemoryDataStore store) =>
+{
+    return Results.Ok(store.Clients.Values.Select(c => new { c.Id, c.Name, c.Company }));
 }).WithTags("Debug");
 
 app.Run();

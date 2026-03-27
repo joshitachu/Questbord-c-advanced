@@ -5,6 +5,14 @@ using QuestBoard.Api.Patterns.Interpreter;
 
 namespace QuestBoard.Api.Patterns.Observer;
 
+// [EIGEN INBRENG: Cross-Pattern Integratie — 4 patterns in 1 subscriber]
+// Deze subscriber demonstreert hoe meerdere design patterns samenwerken:
+// 1. Observer: wordt getriggerd bij quest completion
+// 2. Interpreter: evalueert DSL achievement-regels tegen freelancer stats
+// 3. Flyweight: hergebruikt Badge-objecten uit de gedeelde pool
+// 4. Bridge: stuurt notificaties via het ontkoppelde kanaal-systeem
+// Dit is het meest complexe integratiepunt van het hele project.
+
 // [PATTERN: Observer] — Concrete subscriber
 // Controleert na quest completion of de freelancer nieuwe achievements heeft ontgrendeld
 // Maakt gebruik van Interpreter (DSL evaluatie), Bridge (notificaties) en Flyweight (badges)

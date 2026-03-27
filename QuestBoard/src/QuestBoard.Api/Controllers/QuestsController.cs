@@ -19,6 +19,8 @@ public class QuestsController : ControllerBase
     [HttpPost]
     public IActionResult Create([FromBody] CreateQuestDto dto)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
         var result = _questService.CreateQuest(dto);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }

@@ -3,6 +3,12 @@ using QuestBoard.Api.Hubs;
 
 namespace QuestBoard.Api.Patterns.Observer;
 
+// [EIGEN INBRENG: Real-Time Updates via Observer + SignalR]
+// Combineert het Observer pattern met SignalR voor real-time push-notificaties.
+// Deze subscriber plugt in de bestaande Observer chain en broadcast quest-completion
+// events en leaderboard-updates naar alle verbonden browser-clients via WebSockets.
+// De frontend toont direct toasts en refresht het leaderboard zonder page reload.
+
 // [PATTERN: Observer + SignalR] — Subscriber die events broadcast naar alle verbonden clients
 // Plugt in de bestaande Observer chain: wanneer een quest wordt voltooid,
 // stuurt deze subscriber real-time updates naar de frontend via SignalR.

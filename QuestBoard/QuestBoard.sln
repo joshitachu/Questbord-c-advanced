@@ -1,0 +1,33 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A1B2C3D4-1111-2222-3333-444455556666}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestBoard.Api", "src\QuestBoard.Api\QuestBoard.Api.csproj", "{B1C2D3E4-5555-6666-7777-888899990000}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C1D2E3F4-AAAA-BBBB-CCCC-DDDDEEEE0000}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestBoard.Tests", "tests\QuestBoard.Tests\QuestBoard.Tests.csproj", "{D1E2F3A4-1111-2222-3333-444455550000}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1C2D3E4-5555-6666-7777-888899990000}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1C2D3E4-5555-6666-7777-888899990000}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1C2D3E4-5555-6666-7777-888899990000}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1C2D3E4-5555-6666-7777-888899990000}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1E2F3A4-1111-2222-3333-444455550000}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1E2F3A4-1111-2222-3333-444455550000}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1E2F3A4-1111-2222-3333-444455550000}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1E2F3A4-1111-2222-3333-444455550000}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B1C2D3E4-5555-6666-7777-888899990000} = {A1B2C3D4-1111-2222-3333-444455556666}
+		{D1E2F3A4-1111-2222-3333-444455550000} = {C1D2E3F4-AAAA-BBBB-CCCC-DDDDEEEE0000}
+	EndGlobalSection
+EndGlobal

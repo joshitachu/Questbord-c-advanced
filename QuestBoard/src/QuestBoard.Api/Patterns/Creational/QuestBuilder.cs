@@ -2,6 +2,13 @@ using QuestBoard.Api.Models.Domain;
 
 namespace QuestBoard.Api.Patterns.Creational;
 
+// [EIGEN INBRENG: Fluent Builder met Validatie + Singleton-Defaults]
+// De QuestBuilder combineert het Builder pattern met het Singleton pattern:
+// - Fluent API voor leesbare quest-constructie (bv. .WithTitle().ForClient().AsUrgent())
+// - Build() valideert verplichte velden en past automatisch defaults toe
+//   vanuit de GameConfigurationManager (Singleton), zoals base XP per moeilijkheidsgraad.
+// - AsTeamQuest() enforced minimum team grootte uit de globale configuratie.
+
 // [PATTERN: Builder] — Creational pattern
 // Fluent builder voor Quest objecten. Vervangt complexe object initializers
 // met een leesbare, stapsgewijze constructie inclusief validatie en defaults.

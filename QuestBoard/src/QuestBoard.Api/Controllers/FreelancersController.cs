@@ -19,6 +19,8 @@ public class FreelancersController : ControllerBase
     [HttpPost]
     public IActionResult Create([FromBody] CreateFreelancerDto dto)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
         var result = _freelancerService.CreateFreelancer(dto);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }

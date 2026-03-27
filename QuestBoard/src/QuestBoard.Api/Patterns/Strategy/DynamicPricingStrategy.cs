@@ -1,5 +1,11 @@
 namespace QuestBoard.Api.Patterns.Strategy;
 
+// [EIGEN INBRENG: Dynamische Prijsberekening]
+// Eigen pricing-algoritme dat de prijs berekent op basis van twee factoren:
+// 1. Moeilijkheidsgraad: Easy(0.8x) → Medium(1.0x) → Hard(1.3x) → Epic(1.6x) → Legendary(2.0x)
+// 2. Deadline urgentie: als de deadline binnen 3 dagen valt, wordt een 25% toeslag berekend.
+// Dit simuleert een realistisch freelance-markt prijsmechanisme.
+
 // [PATTERN: Strategy] — Concrete strategy: adjusts price based on difficulty and deadline urgency
 public class DynamicPricingStrategy : IPricingStrategy
 {

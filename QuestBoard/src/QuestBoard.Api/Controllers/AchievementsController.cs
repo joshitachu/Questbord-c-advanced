@@ -26,6 +26,8 @@ public class AchievementsController : ControllerBase
     [HttpPost]
     public IActionResult Create([FromBody] CreateAchievementDto dto)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
         try
         {
             var result = _achievementService.CreateAchievement(dto);

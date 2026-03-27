@@ -2,6 +2,12 @@ using System.Collections.Concurrent;
 
 namespace QuestBoard.Api.Patterns.Concurrency;
 
+// [EIGEN INBRENG: Fine-Grained Per-Quest Locking]
+// In plaats van een enkele globale lock gebruikt deze klasse een ConcurrentDictionary
+// van SemaphoreSlim(1,1) per quest-ID. Hierdoor kunnen meerdere quests tegelijkertijd
+// worden geaccepteerd, terwijl race conditions op dezelfde quest worden voorkomen.
+// Dit is efficienter dan een globale lock bij hoge concurrency.
+
 // [PATTERN: Monitor] — Concurrency pattern
 // Lost race condition op in AcceptQuest() waar twee threads tegelijk
 // dezelfde quest kunnen accepteren (check-then-act op quest.Status).
