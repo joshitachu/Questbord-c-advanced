@@ -1,6 +1,6 @@
 # QuestBoard - Gamified Freelance Platform
 
-QuestBoard is een ASP.NET Core Web API die een gamified freelance-marktplaats simuleert. Freelancers nemen quests aan, verdienen XP en Gold, stijgen in level, en ontgrendelen achievements. Het project demonstreert **10 design patterns** in een samenhangend, werkend systeem.
+QuestBoard is een ASP.NET Core Web API die een gamified freelance-marktplaats simuleert. Freelancers nemen quests aan, verdienen XP en Gold, stijgen in level, en ontgrendelen achievements. Het project demonstreert **11 design patterns** in een samenhangend, werkend systeem.
 
 ## Vereisten
 
@@ -39,6 +39,7 @@ src/QuestBoard.Api/
 │   └── DTOs/                 # CreateQuestDto, FreelancerProfileDto, QuestResponseDto
 ├── Patterns/
 │   ├── Bridge/               # Notification abstractie x kanaal
+│   ├── Command/              # Quest lifecycle commands + undo history
 │   ├── Concurrency/          # Monitor + Producer-Consumer
 │   ├── Creational/           # Singleton + Builder
 │   ├── Decorator/            # Quest modifiers (Urgent/Featured/Team)
@@ -182,7 +183,7 @@ public class DynamicPricingStrategy : IPricingStrategy
 
 **Gebruikt in:** `QuestService.CreateQuest()` selecteert pricing strategy op basis van `PricingType`. `QuestService.GetMatches()` selecteert matchmaking strategy op basis van query parameter.
 
-wat
+---
 
 ### 4. Decorator (Structural)
 
@@ -510,6 +511,64 @@ public class EventQueue<T> : IEventQueue<T>
     }
 }
 ```
+
+---
+
+### 11. Command (Behavioral)
+
+**Probleem:** Quest lifecycle-acties (accepteren, voltooien, verlaten) muteren direct de domein-objecten. Fouten zijn onomkeerbaar en er is geen audittrail van uitgevoerde acties.
+
+**Oplossing:** Elke actie wordt ingekapseld als een `IQuestCommand`-object met een `Execute()` en `Undo()` methode. De `QuestCommandInvoker` voert commands uit en bewaart een history stack, zodat acties teruggedraaid kunnen worden.
+
+**Bestanden:**
+- `Patterns/Command/IQuestCommand.cs` - interface: `Execute()` + `Undo()`
+- `Patterns/Command/AcceptQuestCommand.cs` - wijst freelancer toe, zet status op InProgress
+- `Patterns/Command/CompleteQuestCommand.cs` - markeert quest voltooid, kent XP/Gold toe
+- `Patterns/Command/AbandonQuestCommand.cs` - geeft quest terug naar Open status
+- `Patterns/Command/QuestCommandInvoker.cs` - voert commands uit en beheert undo-stack
+
+**Code:**
+```csharp
+public interface IQuestCommand
+{
+    string CommandName { get; }
+    void Execute();
+    void Undo();
+}
+
+// Voorbeeld: quest accepteren en daarna ongedaan maken
+var invoker = new QuestCommandInvoker();
+invoker.Execute(new AcceptQuestCommand(quest, freelancer));
+// quest.Status == InProgress, quest.AssignedFreelancerId == freelancer.Id
+
+invoker.Undo();
+// quest.Status == Open, quest.AssignedFreelancerId == null
+```
+
+**CompleteQuestCommand bewaart volledige state voor Undo:**
+```csharp
+public void Execute()
+{
+    _previousXp = _freelancer.Xp;
+    _previousGold = _freelancer.Gold;
+    _previousQuestsCompleted = _freelancer.QuestsCompleted;
+
+    _quest.Status = QuestStatus.Completed;
+    _freelancer.Xp += _quest.BaseXp;
+    _freelancer.Gold += _quest.BaseGold;
+    _freelancer.QuestsCompleted++;
+}
+
+public void Undo()
+{
+    _quest.Status = _previousStatus;
+    _freelancer.Xp = _previousXp;
+    _freelancer.Gold = _previousGold;
+    _freelancer.QuestsCompleted = _previousQuestsCompleted;
+}
+```
+
+**Gebruikt in:** Unit tests demonstreren de volledige accept → complete → undo flow. De `QuestCommandInvoker` kan uitgebreid worden met een redo-stack of persistente auditlog.
 
 ---
 
