@@ -1,6 +1,6 @@
 # QuestBoard - Gamified Freelance Platform
 
-QuestBoard is een ASP.NET Core Web API die een gamified freelance-marktplaats simuleert. Freelancers nemen quests aan, verdienen XP en Gold, stijgen in level, en ontgrendelen achievements. Het project demonstreert **11 design patterns** in een samenhangend, werkend systeem.
+QuestBoard is een ASP.NET Core Web API die een gamified freelance-marktplaats simuleert. Freelancers nemen quests aan, verdienen XP en Gold, stijgen in level, en ontgrendelen achievements. Het project demonstreert **12 design patterns** in een samenhangend, werkend systeem.
 
 ## Vereisten
 
@@ -39,6 +39,7 @@ src/QuestBoard.Api/
 │   └── DTOs/                 # CreateQuestDto, FreelancerProfileDto, QuestResponseDto
 ├── Patterns/
 │   ├── Bridge/               # Notification abstractie x kanaal
+│   ├── Chain/                # Quest validatieketen (Chain of Responsibility)
 │   ├── Command/              # Quest lifecycle commands + undo history
 │   ├── Concurrency/          # Monitor + Producer-Consumer
 │   ├── Creational/           # Singleton + Builder
@@ -569,6 +570,75 @@ public void Undo()
 ```
 
 **Gebruikt in:** Unit tests demonstreren de volledige accept → complete → undo flow. De `QuestCommandInvoker` kan uitgebreid worden met een redo-stack of persistente auditlog.
+
+---
+
+### 12. Chain of Responsibility (Behavioral)
+
+**Probleem:** Quest-validatie bestaat uit meerdere onafhankelijke regels (titel, prijs, skills, deadline). Alles in één methode stoppen leidt tot lange if/else-ketens die moeilijk uitbreidbaar zijn.
+
+**Oplossing:** Elke validatieregel is een eigen handler. Handlers worden aan elkaar gekoppeld via `SetNext()`. Elke handler controleert zijn eigen regel en geeft de context door aan de volgende — of retourneert direct een foutmelding (short-circuit).
+
+**Bestanden:**
+- `Patterns/Chain/IQuestValidationHandler.cs` - interface: `SetNext()` + `Validate()`
+- `Patterns/Chain/QuestValidationHandler.cs` - abstracte basis met doorgeven aan next
+- `Patterns/Chain/QuestValidationContext.cs` - data die door de keten stroomt
+- `Patterns/Chain/TitleValidationHandler.cs` - titel niet leeg, max 100 tekens
+- `Patterns/Chain/PricingValidationHandler.cs` - BaseGold > 0
+- `Patterns/Chain/SkillsValidationHandler.cs` - minimaal één skill vereist
+- `Patterns/Chain/DeadlineValidationHandler.cs` - deadline in toekomst; urgent → deadline verplicht
+
+**Code (opbouw keten):**
+```csharp
+var title    = new TitleValidationHandler();
+var pricing  = new PricingValidationHandler();
+var skills   = new SkillsValidationHandler();
+var deadline = new DeadlineValidationHandler();
+
+title.SetNext(pricing).SetNext(skills).SetNext(deadline);
+
+string? error = title.Validate(new QuestValidationContext
+{
+    Title         = "Build REST API",
+    BaseGold      = 500m,
+    RequiredSkills = new() { "C#" },
+    Deadline      = DateTime.UtcNow.AddDays(7),
+});
+// error == null → keten doorstaan
+```
+
+**Code (abstracte basis):**
+```csharp
+public abstract class QuestValidationHandler : IQuestValidationHandler
+{
+    private IQuestValidationHandler? _next;
+
+    public IQuestValidationHandler SetNext(IQuestValidationHandler next)
+    {
+        _next = next;
+        return next; // retourneert next voor fluent chaining
+    }
+
+    public virtual string? Validate(QuestValidationContext context)
+    {
+        return _next?.Validate(context); // delegeer naar volgende of null
+    }
+}
+```
+
+**Short-circuit gedrag:**
+```
+Context: { Title = "", BaseGold = 0, Skills = [] }
+
+TitleValidationHandler  → title leeg → retourneer foutmelding, stop
+PricingValidationHandler → wordt nooit bereikt
+SkillsValidationHandler  → wordt nooit bereikt
+```
+
+**Nieuwe validatieregel toevoegen:**
+Maak een klasse die `QuestValidationHandler` overerft en roep `SetNext()` aan — geen bestaande code wijzigen.
+
+**Gebruikt in:** Unit tests (`ChainTests.cs`) demonstreren de volledige happy-path en alle faalscenarios inclusief short-circuit gedrag.
 
 ---
 
